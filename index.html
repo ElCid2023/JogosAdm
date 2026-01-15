@@ -399,6 +399,9 @@
             
             playerName = name;
             
+            // Limpar pontuação anterior (novo aluno)
+            sistemaPontuacao.resetar();
+            
             // Registrar acesso no Google Sheets e LocalStorage
             registrarAcesso(name, semestre, turma, periodo, email);
             
@@ -424,6 +427,18 @@
                 jogosCompletados: stats.jogosCompletados,
                 timestamp: agora.getTime()
             };
+            
+            // Salvar dados do aluno atual para uso nos jogos
+            localStorage.setItem('dados_aluno_atual', JSON.stringify({
+                nome: nome,
+                semestre: semestre,
+                turma: turma,
+                periodo: periodo,
+                email: email || 'Não informado'
+            }));
+            
+            // Salvar URL do Google Sheets
+            localStorage.setItem('google_script_url', GOOGLE_SCRIPT_URL);
             
             // Salvar no LocalStorage (backup local)
             const acessos = JSON.parse(localStorage.getItem('relatorio_acessos') || '[]');
