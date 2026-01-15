@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arrastar e Soltar - Estilos de Liderança</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .leadership-style {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            min-height: 300px;
+        }
+        
+        .leadership-style h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .drop-zone {
+            border: 3px dashed #ccc;
+            border-radius: 10px;
+            min-height: 200px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .drop-zone.drag-over {
+            border-color: #4CAF50;
+            background: #e8f5e8;
+        }
+        
+        .characteristics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .characteristic {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: grab;
+            text-align: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        
+        .characteristic:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .characteristic.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+        
+        .characteristic.correct {
+            background: #4CAF50;
+            cursor: default;
+        }
+        
+        .characteristic.incorrect {
+            background: #f44336;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .score {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .buttons {
+            text-align: center;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .btn.restart {
+            background: #ff6b6b;
+        }
+        
+        .btn.restart:hover {
+            background: #ff5252;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .final-message {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Arrastar e Soltar - Estilos de Liderança</h1>
+        
+        <div class="instructions">
+            <strong>Instruções:</strong> Arraste as características para o estilo de liderança correspondente!
+        </div>
+        
+        <div class="score">
+            Pontuação: <span id="score">0</span> / <span id="total">12</span>
+        </div>
+        
+        <div class="game-area">
+            <div class="leadership-style">
+                <h3>🏛️ Autocrática</h3>
+                <div class="drop-zone" data-style="autocratica"></div>
+            </div>
+            
+            <div class="leadership-style">
+                <h3>🤝 Democrática</h3>
+                <div class="drop-zone" data-style="democratica"></div>
+            </div>
+            
+            <div class="leadership-style">
+                <h3>🆓 Laissez-faire</h3>
+                <div class="drop-zone" data-style="laissez-faire"></div>
+            </div>
+        </div>
+        
+        <div class="characteristics" id="characteristics">
+            <div class="characteristic" draggable="true" data-correct="autocratica">Decisões centralizadas</div>
+            <div class="characteristic" draggable="true" data-correct="autocratica">Controle rígido</div>
+            <div class="characteristic" draggable="true" data-correct="autocratica">Pouca participação da equipe</div>
+            <div class="characteristic" draggable="true" data-correct="autocratica">Comunicação descendente</div>
+            
+            <div class="characteristic" draggable="true" data-correct="democratica">Participação da equipe</div>
+            <div class="characteristic" draggable="true" data-correct="democratica">Decisões compartilhadas</div>
+            <div class="characteristic" draggable="true" data-correct="democratica">Comunicação bidirecional</div>
+            <div class="characteristic" draggable="true" data-correct="democratica">Feedback constante</div>
+            
+            <div class="characteristic" draggable="true" data-correct="laissez-faire">Liberdade total</div>
+            <div class="characteristic" draggable="true" data-correct="laissez-faire">Mínima interferência</div>
+            <div class="characteristic" draggable="true" data-correct="laissez-faire">Autogestão da equipe</div>
+            <div class="characteristic" draggable="true" data-correct="laissez-faire">Responsabilidade individual</div>
+        </div>
+        
+        <div class="final-message" id="final-message">
+            <h2>🎉 Parabéns!</h2>
+            <p id="final-text"></p>
+        </div>
+        
+        <div class="buttons">
+            <button class="btn restart" onclick="restartGame()">Reiniciar</button>
+            <button class="btn" id="next-btn" onclick="proximoJogo()" disabled>Próximo Jogo</button>
+            <button class="btn" onclick="goHome()">Voltar ao Menu</button>
+        </div>
+    </div>
+
+    <script src="sistema-pontuacao.js"></script>
+    <script>
+        let score = 0;
+        let totalItems = 12;
+        let gameCompleted = false;
+
+        function initGame() {
+            const characteristics = document.querySelectorAll('.characteristic');
+            const dropZones = document.querySelectorAll('.drop-zone');
+            
+            // Embaralhar características
+            const container = document.getElementById('characteristics');
+            const items = Array.from(characteristics);
+            items.sort(() => Math.random() - 0.5);
+            items.forEach(item => container.appendChild(item));
+            
+            characteristics.forEach(char => {
+                char.addEventListener('dragstart', handleDragStart);
+                char.addEventListener('dragend', handleDragEnd);
+            });
+            
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('drop', handleDrop);
+                zone.addEventListener('dragenter', handleDragEnter);
+                zone.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.correct);
+            e.target.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            e.target.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.target.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.target.classList.remove('drag-over');
+            
+            const draggedData = e.dataTransfer.getData('text/plain');
+            const dropZoneStyle = e.target.dataset.style;
+            const draggedElement = document.querySelector('.characteristic.dragging');
+            
+            if (!draggedElement || draggedElement.classList.contains('correct')) {
+                return;
+            }
+            
+            if (draggedData === dropZoneStyle) {
+                // Resposta correta
+                draggedElement.classList.add('correct');
+                draggedElement.draggable = false;
+                e.target.appendChild(draggedElement);
+                score++;
+                playAudio('Correto!');
+            } else {
+                // Resposta incorreta
+                draggedElement.classList.add('incorrect');
+                setTimeout(() => {
+                    draggedElement.classList.remove('incorrect');
+                }, 500);
+                playAudio('Tente novamente!');
+            }
+            
+            updateScore();
+            checkGameComplete();
+        }
+
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
+        function checkGameComplete() {
+            if (score === totalItems && !gameCompleted) {
+                gameCompleted = true;
+                
+                const percentage = (score / totalItems) * 100;
+                const pontos = Math.round(percentage);
+                const resultado = sistemaPontuacao.adicionarPontos('arrastar-intermediario', pontos, 100);
+                
+                // Atualizar progresso do nível
+                const progresso = JSON.parse(localStorage.getItem('progresso_niveis') || '{}');
+                progresso.intermediario = Math.max(progresso.intermediario || 0, percentage);
+                localStorage.setItem('progresso_niveis', JSON.stringify(progresso));
+                
+                let message = `Você acertou todas as ${totalItems} características! Pontos: ${pontos}`;
+                if (resultado.melhorPontuacao) {
+                    message += ` ✨ Nova melhor pontuação!`;
+                }
+                message += ` Total: ${resultado.pontuacaoTotal} pontos (${resultado.progresso}% completo)`;
+                
+                document.getElementById('final-text').textContent = message;
+                document.getElementById('final-message').style.display = 'block';
+                document.getElementById('next-btn').disabled = false;
+                
+                playAudio('Parabéns! Você domina os estilos de liderança!');
+            }
+        }
+
+        function restartGame() {
+            score = 0;
+            gameCompleted = false;
+            
+            document.getElementById('final-message').style.display = 'none';
+            document.getElementById('next-btn').disabled = true;
+            
+            // Resetar características
+            const characteristics = document.querySelectorAll('.characteristic');
+            const container = document.getElementById('characteristics');
+            
+            characteristics.forEach(char => {
+                char.classList.remove('correct', 'incorrect');
+                char.draggable = true;
+                container.appendChild(char);
+            });
+            
+            // Limpar drop zones
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.innerHTML = '';
+            });
+            
+            updateScore();
+            initGame();
+        }
+
+        function playAudio(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'pt-BR';
+                utterance.rate = 0.9;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function goHome() {
+            window.location.href = 'index.html#intermediario';
+        }
+        
+        function proximoJogo() {
+            const jogosIntermediarios = [
+                'quiz-intermediario.html',
+                'jogo-memoria-intermediario.html',
+                'jogo-arrastar-intermediario.html',
+                'jogo-completar-intermediario.html',
+                'jogo-lacunas.html'
+            ];
+            const jogoAtual = window.location.pathname.split('/').pop();
+            const indiceAtual = jogosIntermediarios.indexOf(jogoAtual);
+            
+            if (indiceAtual < jogosIntermediarios.length - 1) {
+                window.location.href = jogosIntermediarios[indiceAtual + 1];
+            } else {
+                window.location.href = 'index.html#intermediario';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initGame();
+            playAudio('Arraste as características para os estilos de liderança corretos!');
+        });
+    </script>
+</body>
+</html>

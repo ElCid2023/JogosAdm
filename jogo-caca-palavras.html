@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caça-Palavras - Teóricos da Administração</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        h1 {
+            color: #4a5568;
+            margin-bottom: 20px;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .grid-container {
+            display: inline-block;
+            margin: 20px;
+        }
+        
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 30px);
+            gap: 2px;
+            margin-bottom: 20px;
+        }
+        
+        .grid-cell {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            background: white;
+        }
+        
+        .grid-cell.found {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .words-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .word-item {
+            display: inline-block;
+            margin: 5px 10px;
+            padding: 5px 10px;
+            background: #e3f2fd;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+        
+        .word-item.found {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .home-btn, .restart-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        .restart-btn {
+            background: #ff6b6b;
+        }
+        
+        .next-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Caça-Palavras - Teóricos da Administração</h1>
+        
+        <div class="game-info">
+            <span>Palavras encontradas: <span id="found-count">0</span>/5</span>
+            <span>Pontos: <span id="points">0</span></span>
+        </div>
+        
+        <div class="grid-container">
+            <div class="word-grid" id="word-grid"></div>
+        </div>
+        
+        <div class="words-list">
+            <h3>Encontre os teóricos:</h3>
+            <div class="word-item" data-word="TAYLOR">TAYLOR</div>
+            <div class="word-item" data-word="FAYOL">FAYOL</div>
+            <div class="word-item" data-word="FORD">FORD</div>
+            <div class="word-item" data-word="MAYO">MAYO</div>
+            <div class="word-item" data-word="MASLOW">MASLOW</div>
+        </div>
+        
+        <div id="game-complete" style="display: none;">
+            <h2>🎉 Parabéns! Você encontrou todos os teóricos!</h2>
+            <p id="final-message"></p>
+        </div>
+        
+        <button class="restart-btn" onclick="newGame()">Novo Jogo</button>
+        <button class="next-btn" id="next-btn" onclick="proximoJogo()" disabled>Próximo Jogo</button>
+        <button class="home-btn" onclick="goHome()">Voltar ao Menu</button>
+    </div>
+
+    <script src="sistema-pontuacao.js"></script>
+    <script>
+        const words = ['TAYLOR', 'FAYOL', 'FORD', 'MAYO', 'MASLOW'];
+        const gridSize = 12;
+        let grid = [];
+        let foundWords = [];
+        let points = 0;
+
+        function createGrid() {
+            let attempts = 0;
+            let allPlaced = false;
+            
+            while (!allPlaced && attempts < 10) {
+                grid = Array(gridSize).fill().map(() => Array(gridSize).fill(''));
+                let placedCount = 0;
+                
+                // Tentar colocar todas as palavras
+                words.forEach(word => {
+                    if (placeWord(word)) {
+                        placedCount++;
+                    }
+                });
+                
+                if (placedCount === words.length) {
+                    allPlaced = true;
+                } else {
+                    attempts++;
+                }
+            }
+            
+            // Preencher espaços vazios com letras aleatórias
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    if (grid[i][j] === '') {
+                        grid[i][j] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+                    }
+                }
+            }
+        }
+
+        function placeWord(word) {
+            for (let attempts = 0; attempts < 100; attempts++) {
+                const direction = Math.floor(Math.random() * 3);
+                const row = Math.floor(Math.random() * gridSize);
+                const col = Math.floor(Math.random() * gridSize);
+                
+                if (canPlaceWord(word, row, col, direction)) {
+                    for (let i = 0; i < word.length; i++) {
+                        let newRow = row;
+                        let newCol = col;
+                        
+                        if (direction === 0) newCol += i;
+                        else if (direction === 1) newRow += i;
+                        else { newRow += i; newCol += i; }
+                        
+                        grid[newRow][newCol] = word[i];
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function canPlaceWord(word, row, col, direction) {
+            for (let i = 0; i < word.length; i++) {
+                let newRow = row;
+                let newCol = col;
+                
+                if (direction === 0) newCol += i; // horizontal
+                else if (direction === 1) newRow += i; // vertical
+                else { newRow += i; newCol += i; } // diagonal
+                
+                if (newRow < 0 || newRow >= gridSize || newCol < 0 || newCol >= gridSize) {
+                    return false;
+                }
+                
+                if (grid[newRow][newCol] !== '' && grid[newRow][newCol] !== word[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function renderGrid() {
+            const gridElement = document.getElementById('word-grid');
+            gridElement.innerHTML = '';
+            
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.textContent = grid[i][j];
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.onclick = () => selectCell(i, j);
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+
+        let firstClick = null;
+
+        function selectCell(row, col) {
+            if (!firstClick) {
+                // Primeiro clique
+                firstClick = {row, col};
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                cell.style.background = '#ff6b6b';
+                if (foundWords.length === 0) {
+                    playAudio('Primeira letra selecionada.');
+                }
+            } else {
+                // Segundo clique - tentar formar palavra
+                const path = getLinePath(firstClick, {row, col});
+                if (path) {
+                    const word = path.map(c => grid[c.row][c.col]).join('');
+                    const reverseWord = word.split('').reverse().join('');
+                    
+                    if (words.includes(word) && !foundWords.includes(word)) {
+                        markWordFound(word, path);
+                    } else if (words.includes(reverseWord) && !foundWords.includes(reverseWord)) {
+                        markWordFound(reverseWord, path);
+                    }
+                }
+                
+                // Limpar primeira seleção
+                const firstCell = document.querySelector(`[data-row="${firstClick.row}"][data-col="${firstClick.col}"]`);
+                if (!firstCell.classList.contains('found')) {
+                    firstCell.style.background = 'white';
+                }
+                firstClick = null;
+            }
+        }
+
+        function getLinePath(start, end) {
+            const rowDiff = end.row - start.row;
+            const colDiff = end.col - start.col;
+            
+            // Verificar se está em linha (horizontal, vertical ou diagonal)
+            if (rowDiff !== 0 && colDiff !== 0 && Math.abs(rowDiff) !== Math.abs(colDiff)) {
+                return null;
+            }
+            
+            const steps = Math.max(Math.abs(rowDiff), Math.abs(colDiff));
+            const rowStep = rowDiff === 0 ? 0 : rowDiff / steps;
+            const colStep = colDiff === 0 ? 0 : colDiff / steps;
+            
+            const path = [];
+            for (let i = 0; i <= steps; i++) {
+                path.push({
+                    row: start.row + Math.round(i * rowStep),
+                    col: start.col + Math.round(i * colStep)
+                });
+            }
+            return path;
+        }
+
+        function markWordFound(word, path) {
+            foundWords.push(word);
+            points += word.length * 10;
+            
+            path.forEach(c => {
+                const cell = document.querySelector(`[data-row="${c.row}"][data-col="${c.col}"]`);
+                cell.classList.add('found');
+            });
+            
+            document.querySelector(`[data-word="${word}"]`).classList.add('found');
+            document.getElementById('found-count').textContent = foundWords.length;
+            document.getElementById('points').textContent = points;
+            
+            playAudio(`Encontrou ${word}!`);
+            
+            if (foundWords.length === words.length) {
+                completeGame();
+            }
+        }
+
+
+
+        function completeGame() {
+            const resultado = sistemaPontuacao.adicionarPontos('caca-palavras', points, 300);
+            
+            // Habilitar próximo jogo
+            document.getElementById('next-btn').disabled = false;
+            
+            // Atualizar progresso do nível
+            const progresso = JSON.parse(localStorage.getItem('progresso_niveis') || '{}');
+            const percentual = (points / 300) * 100;
+            progresso.basico = Math.max(progresso.basico || 0, percentual);
+            localStorage.setItem('progresso_niveis', JSON.stringify(progresso));
+            
+            let message = `Pontos: ${points}`;
+            if (resultado.melhorPontuacao) {
+                message += ` ✨ Nova melhor pontuação!`;
+            }
+            message += ` Total: ${resultado.pontuacaoTotal} pontos`;
+            
+            document.getElementById('final-message').innerHTML = `
+                ${message}
+                <div style="margin: 10px 0;">
+                    <div id="progresso-caca"></div>
+                </div>
+            `;
+            
+            document.getElementById('game-complete').style.display = 'block';
+            criarBarraProgresso('progresso-caca', resultado.progresso, 'Progresso Geral');
+            
+            playAudio('Parabéns! Você encontrou todos os teóricos da administração!');
+        }
+
+        function newGame() {
+            foundWords = [];
+            points = 0;
+            firstClick = null;
+            
+            document.getElementById('found-count').textContent = '0';
+            document.getElementById('points').textContent = '0';
+            document.getElementById('game-complete').style.display = 'none';
+            document.getElementById('next-btn').disabled = true;
+            
+            document.querySelectorAll('.word-item').forEach(item => {
+                item.classList.remove('found');
+            });
+            
+            createGrid();
+            renderGrid();
+            
+            playAudio('Novo jogo! Encontre os teóricos da administração no caça-palavras!');
+        }
+
+        function proximoJogo() {
+            const jogosBasicos = [
+                'quiz-basico.html',
+                'jogo-memoria.html', 
+                'jogo-arrastar.html',
+                'jogo-lacunas.html',
+                'jogo-caca-palavras.html',
+                'jogo-ligar-pontos.html',
+                'jogo-completar-frases.html',
+                'jogo-forca.html'
+            ];
+            const jogoAtual = window.location.pathname.split('/').pop();
+            const indiceAtual = jogosBasicos.indexOf(jogoAtual);
+            
+            if (indiceAtual < jogosBasicos.length - 1) {
+                window.location.href = jogosBasicos[indiceAtual + 1];
+            } else {
+                window.location.href = 'index.html#basico';
+            }
+        }
+
+        function playAudio(text) {
+            if ('speechSynthesis' in window) {
+                speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'pt-BR';
+                utterance.rate = 1.2;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function goHome() {
+            window.location.href = 'index.html#basico';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            newGame();
+        });
+    </script>
+</body>
+</html>

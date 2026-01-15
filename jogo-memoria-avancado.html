@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória - Estratégia Empresarial</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        h1 {
+            color: #4a5568;
+            margin-bottom: 20px;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+        
+        .memory-card {
+            aspect-ratio: 1;
+            background: #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: center;
+            padding: 5px;
+        }
+        
+        .memory-card:hover {
+            transform: scale(1.05);
+        }
+        
+        .memory-card.flipped {
+            background: #4CAF50;
+        }
+        
+        .memory-card.matched {
+            background: #2e7d32;
+            cursor: default;
+        }
+        
+        .home-btn, .restart-btn, .next-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        .restart-btn {
+            background: #ff6b6b;
+        }
+        
+        .next-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💼 Jogo da Memória - Estratégia Empresarial</h1>
+        
+        <div class="game-info">
+            <span>Tentativas: <span id="attempts">0</span></span>
+            <span>Pares: <span id="pairs">0</span>/12</span>
+        </div>
+        
+        <div class="memory-grid" id="memory-grid"></div>
+        
+        <div id="game-over" style="display: none;">
+            <h2>🎉 Parabéns!</h2>
+            <p>Você completou o jogo em <span id="final-attempts"></span> tentativas!</p>
+        </div>
+        
+        <button class="restart-btn" onclick="startGame()">Novo Jogo</button>
+        <button class="next-btn" id="next-btn" onclick="proximoJogo()" disabled>Próximo Jogo</button>
+        <button class="home-btn" onclick="goHome()">Voltar ao Menu</button>
+    </div>
+
+    <script src="sistema-pontuacao.js"></script>
+    <script>
+        const cards = [
+            { id: 1, text: 'SWOT' },
+            { id: 1, text: 'Forças, Fraquezas, Oportunidades, Ameaças' },
+            { id: 2, text: 'Porter' },
+            { id: 2, text: '5 Forças Competitivas' },
+            { id: 3, text: 'Blue Ocean' },
+            { id: 3, text: 'Estratégia do Oceano Azul' },
+            { id: 4, text: 'Balanced Scorecard' },
+            { id: 4, text: 'BSC - Indicadores Balanceados' },
+            { id: 5, text: 'Benchmarking' },
+            { id: 5, text: 'Comparação com Melhores Práticas' },
+            { id: 6, text: 'Core Competence' },
+            { id: 6, text: 'Competências Essenciais' },
+            { id: 7, text: 'Disrupção' },
+            { id: 7, text: 'Inovação Revolucionária' },
+            { id: 8, text: 'Stakeholders' },
+            { id: 8, text: 'Partes Interessadas' },
+            { id: 9, text: 'KPI' },
+            { id: 9, text: 'Indicadores-Chave de Performance' },
+            { id: 10, text: 'Lean Startup' },
+            { id: 10, text: 'Metodologia Enxuta' },
+            { id: 11, text: 'Design Thinking' },
+            { id: 11, text: 'Pensamento de Design' },
+            { id: 12, text: 'Agile' },
+            { id: 12, text: 'Metodologia Ágil' }
+        ];
+
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let attempts = 0;
+        let gameCards = [];
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startGame() {
+            gameCards = shuffle([...cards]);
+            flippedCards = [];
+            matchedPairs = 0;
+            attempts = 0;
+            
+            document.getElementById('attempts').textContent = attempts;
+            document.getElementById('pairs').textContent = matchedPairs;
+            document.getElementById('game-over').style.display = 'none';
+            document.getElementById('next-btn').disabled = true;
+            
+            const grid = document.getElementById('memory-grid');
+            grid.innerHTML = '';
+            
+            gameCards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'memory-card flipped';
+                cardElement.textContent = card.text;
+                cardElement.dataset.id = card.id;
+                cardElement.dataset.text = card.text;
+                cardElement.dataset.index = index;
+                cardElement.onclick = () => flipCard(cardElement);
+                grid.appendChild(cardElement);
+            });
+            
+            playAudio('Memorize os conceitos estratégicos! Em 8 segundos as cartas serão viradas.');
+            
+            gameStarted = false;
+            setTimeout(() => {
+                document.querySelectorAll('.memory-card').forEach(card => {
+                    card.classList.remove('flipped');
+                    card.textContent = '?';
+                });
+                gameStarted = true;
+                playAudio('Agora encontre os pares de conceitos estratégicos!');
+            }, 8000);
+        }
+
+        let gameStarted = false;
+        
+        function flipCard(cardElement) {
+            if (!gameStarted || flippedCards.length >= 2 || cardElement.classList.contains('flipped') || cardElement.classList.contains('matched')) {
+                return;
+            }
+            
+            cardElement.classList.add('flipped');
+            cardElement.textContent = cardElement.dataset.text;
+            flippedCards.push(cardElement);
+            
+            if (flippedCards.length === 2) {
+                attempts++;
+                document.getElementById('attempts').textContent = attempts;
+                
+                setTimeout(() => {
+                    checkMatch();
+                }, 1200);
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            
+            if (card1.dataset.id === card2.dataset.id) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                matchedPairs++;
+                document.getElementById('pairs').textContent = matchedPairs;
+                
+                playAudio('Correto! Par encontrado!');
+                
+                if (matchedPairs === 12) {
+                    document.getElementById('final-attempts').textContent = attempts;
+                    document.getElementById('game-over').style.display = 'block';
+                    
+                    const pontos = Math.max(40, 100 - (attempts * 2));
+                    const resultado = sistemaPontuacao.adicionarPontos('memoria-avancado', pontos, 100);
+                    
+                    document.getElementById('next-btn').disabled = false;
+                    
+                    const progresso = JSON.parse(localStorage.getItem('progresso_niveis') || '{}');
+                    const percentual = (pontos / 100) * 100;
+                    progresso.avancado = Math.max(progresso.avancado || 0, percentual);
+                    localStorage.setItem('progresso_niveis', JSON.stringify(progresso));
+                    
+                    let message = `Parabéns! Você completou o jogo em ${attempts} tentativas! Pontos: ${pontos}`;
+                    if (resultado.melhorPontuacao) {
+                        message += ` ✨ Nova melhor pontuação!`;
+                    }
+                    message += ` Total: ${resultado.pontuacaoTotal} pontos`;
+                    
+                    document.getElementById('game-over').innerHTML = `
+                        <h2>🎉 Parabéns!</h2>
+                        <p>${message}</p>
+                        <div style="margin: 10px 0;">
+                            <div id="progresso-memoria"></div>
+                        </div>
+                    `;
+                    
+                    criarBarraProgresso('progresso-memoria', resultado.progresso, 'Progresso Geral');
+                    playAudio(message);
+                }
+            } else {
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+                card1.textContent = '?';
+                card2.textContent = '?';
+            }
+            
+            flippedCards = [];
+        }
+
+        function playAudio(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'pt-BR';
+                utterance.rate = 0.9;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function goHome() {
+            window.location.href = 'index.html#avancado';
+        }
+        
+        function proximoJogo() {
+            const jogosAvancados = [
+                'quiz-avancado.html',
+                'jogo-memoria-avancado.html',
+                'jogo-arrastar-avancado.html',
+                'jogo-caca-palavras-avancado.html',
+                'jogo-forca.html'
+            ];
+            const jogoAtual = window.location.pathname.split('/').pop();
+            const indiceAtual = jogosAvancados.indexOf(jogoAtual);
+            
+            if (indiceAtual < jogosAvancados.length - 1) {
+                window.location.href = jogosAvancados[indiceAtual + 1];
+            } else {
+                window.location.href = 'index.html#avancado';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            startGame();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Administração - Jogo Educacional</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .score {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .question {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            color: #333;
+            border-left: 5px solid #667eea;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            background: #e3f2fd;
+            border: 2px solid #bbdefb;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            background: #bbdefb;
+            transform: translateY(-2px);
+        }
+
+        .option.correct {
+            background: #c8e6c9;
+            border-color: #4CAF50;
+            color: #2e7d32;
+        }
+
+        .option.incorrect {
+            background: #ffcdd2;
+            border-color: #f44336;
+            color: #c62828;
+        }
+
+        .next-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .next-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .next-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .final-score {
+            font-size: 2em;
+            color: #4CAF50;
+            margin: 20px 0;
+        }
+
+        .restart-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            background: #ff5252;
+        }
+
+        .progress {
+            background: #e0e0e0;
+            height: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: #4CAF50;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Quiz Administração</h1>
+        
+        <div id="game-area">
+            <div class="score">
+                Pontuação: <span id="score">0</span> / <span id="total">0</span>
+            </div>
+            
+            <div class="progress">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            
+            <div class="question" id="question"></div>
+            
+            <div class="options" id="options"></div>
+            
+            <button class="next-btn" id="next-btn" onclick="nextQuestion()" disabled>
+                Próxima Pergunta
+            </button>
+        </div>
+        
+        <div id="final-screen" style="display: none;">
+            <div class="final-score" id="final-score"></div>
+            <p id="final-message"></p>
+            <button class="restart-btn" onclick="restartGame()">Jogar Novamente</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Qual é a principal função do planejamento na administração?",
+                options: [
+                    "Controlar os funcionários",
+                    "Definir objetivos e estratégias para alcançá-los",
+                    "Aumentar os lucros imediatamente",
+                    "Reduzir custos operacionais"
+                ],
+                correct: 1
+            },
+            {
+                question: "O que significa a sigla PDCA no contexto administrativo?",
+                options: [
+                    "Plan, Do, Check, Act",
+                    "Profit, Develop, Control, Analyze",
+                    "Process, Design, Create, Apply",
+                    "Produce, Distribute, Calculate, Assess"
+                ],
+                correct: 0
+            },
+            {
+                question: "Qual das alternativas representa melhor o conceito de liderança?",
+                options: [
+                    "Dar ordens aos subordinados",
+                    "Influenciar pessoas para alcançar objetivos comuns",
+                    "Controlar todas as atividades da empresa",
+                    "Tomar decisões sem consultar a equipe"
+                ],
+                correct: 1
+            },
+            {
+                question: "O que é organograma em uma empresa?",
+                options: [
+                    "Um gráfico de vendas mensais",
+                    "Uma representação visual da estrutura hierárquica",
+                    "Um relatório financeiro",
+                    "Um cronograma de atividades"
+                ],
+                correct: 1
+            },
+            {
+                question: "Qual é o objetivo principal do controle na administração?",
+                options: [
+                    "Punir funcionários que cometem erros",
+                    "Verificar se os resultados estão conforme o planejado",
+                    "Aumentar a produtividade a qualquer custo",
+                    "Reduzir o número de funcionários"
+                ],
+                correct: 1
+            },
+            {
+                question: "O que caracteriza um líder democrático?",
+                options: [
+                    "Toma todas as decisões sozinho",
+                    "Não se envolve nas decisões da equipe",
+                    "Envolve a equipe no processo de tomada de decisão",
+                    "Deixa a equipe trabalhar sem orientação"
+                ],
+                correct: 2
+            },
+            {
+                question: "Qual das opções representa uma função administrativa básica?",
+                options: [
+                    "Vendas",
+                    "Marketing",
+                    "Organização",
+                    "Produção"
+                ],
+                correct: 2
+            },
+            {
+                question: "O que é delegação de autoridade?",
+                options: [
+                    "Transferir responsabilidades para subordinados",
+                    "Demitir funcionários incompetentes",
+                    "Aumentar o salário dos funcionários",
+                    "Contratar novos funcionários"
+                ],
+                correct: 0
+            },
+            {
+                question: "Qual é a importância da comunicação na administração?",
+                options: [
+                    "Apenas para dar ordens",
+                    "Facilitar o fluxo de informações e coordenação",
+                    "Controlar os funcionários",
+                    "Reduzir custos operacionais"
+                ],
+                correct: 1
+            },
+            {
+                question: "O que significa eficiência em administração?",
+                options: [
+                    "Fazer as coisas certas",
+                    "Fazer as coisas da maneira correta",
+                    "Aumentar os lucros",
+                    "Contratar mais funcionários"
+                ],
+                correct: 1
+            },
+            {
+                question: "Qual é a diferença entre eficiência e eficácia?",
+                options: [
+                    "Não há diferença",
+                    "Eficiência é fazer certo, eficácia é fazer a coisa certa",
+                    "Eficiência é mais importante que eficácia",
+                    "Eficácia é apenas para grandes empresas"
+                ],
+                correct: 1
+            },
+            {
+                question: "O que é motivação no contexto organizacional?",
+                options: [
+                    "Dar prêmios em dinheiro",
+                    "Forças que impulsionam o comportamento para objetivos",
+                    "Controlar o horário dos funcionários",
+                    "Aumentar a carga de trabalho"
+                ],
+                correct: 1
+            },
+            {
+                question: "Qual das teorias motivacionais foi criada por Maslow?",
+                options: [
+                    "Teoria X e Y",
+                    "Hierarquia das Necessidades",
+                    "Teoria dos Dois Fatores",
+                    "Teoria da Expectativa"
+                ],
+                correct: 1
+            },
+            {
+                question: "O que caracteriza uma estrutura organizacional funcional?",
+                options: [
+                    "Divisão por produtos",
+                    "Divisão por especialização/função",
+                    "Divisão por região geográfica",
+                    "Divisão por clientes"
+                ],
+                correct: 1
+            },
+            {
+                question: "Qual é o principal objetivo do planejamento estratégico?",
+                options: [
+                    "Definir metas de curto prazo",
+                    "Estabelecer direção de longo prazo da organização",
+                    "Controlar custos diários",
+                    "Gerenciar funcionários"
+                ],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswer = null;
+
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('question').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            document.getElementById('next-btn').disabled = true;
+            selectedAnswer = null;
+            
+            // Atualizar progresso
+            const progress = ((currentQuestion) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            
+            // Atualizar contador
+            document.getElementById('total').textContent = questions.length;
+        }
+
+        function selectAnswer(index) {
+            if (selectedAnswer !== null) return;
+            
+            selectedAnswer = index;
+            const options = document.querySelectorAll('.option');
+            const question = questions[currentQuestion];
+            
+            options.forEach((option, i) => {
+                if (i === question.correct) {
+                    option.classList.add('correct');
+                } else if (i === index && i !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            if (index === question.correct) {
+                score++;
+                document.getElementById('score').textContent = score;
+            }
+            
+            document.getElementById('next-btn').disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function showFinalScore() {
+            document.getElementById('game-area').style.display = 'none';
+            document.getElementById('final-screen').style.display = 'block';
+            
+            const percentage = (score / questions.length) * 100;
+            document.getElementById('final-score').textContent = `${score}/${questions.length} (${percentage.toFixed(1)}%)`;
+            
+            let message = '';
+            if (percentage >= 90) {
+                message = '🏆 Excelente! Você domina os conceitos de Administração!';
+            } else if (percentage >= 70) {
+                message = '👏 Muito bom! Você tem um bom conhecimento em Administração!';
+            } else if (percentage >= 50) {
+                message = '📚 Bom trabalho! Continue estudando para melhorar ainda mais!';
+            } else {
+                message = '💪 Continue se esforçando! A prática leva à perfeição!';
+            }
+            
+            document.getElementById('final-message').textContent = message;
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            selectedAnswer = null;
+            
+            document.getElementById('score').textContent = '0';
+            document.getElementById('game-area').style.display = 'block';
+            document.getElementById('final-screen').style.display = 'none';
+            
+            loadQuestion();
+        }
+
+        // Inicializar o jogo
+        loadQuestion();
+    </script>
+</body>
+</html>

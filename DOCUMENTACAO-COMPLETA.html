@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação Completa - Quiz Administração v2.0</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; text-align: center; }
+        header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        nav { background: #2d3748; padding: 15px; position: sticky; top: 0; z-index: 100; }
+        nav a { color: white; text-decoration: none; padding: 10px 15px; display: inline-block; transition: background 0.3s; }
+        nav a:hover { background: #4a5568; border-radius: 5px; }
+        .content { padding: 40px; }
+        section { margin-bottom: 50px; }
+        h2 { color: #667eea; font-size: 2em; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #667eea; }
+        h3 { color: #764ba2; font-size: 1.5em; margin: 25px 0 15px 0; }
+        h4 { color: #4a5568; font-size: 1.2em; margin: 20px 0 10px 0; }
+        pre { background: #2d3748; color: #fff; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 15px 0; }
+        code { background: #e2e8f0; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
+        pre code { background: transparent; padding: 0; }
+        .info-box { background: #e3f2fd; border-left: 4px solid #2196F3; padding: 15px; margin: 15px 0; border-radius: 4px; }
+        .warning-box { background: #fff3e0; border-left: 4px solid #ff9800; padding: 15px; margin: 15px 0; border-radius: 4px; }
+        .success-box { background: #e8f5e9; border-left: 4px solid #4CAF50; padding: 15px; margin: 15px 0; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        table th { background: #667eea; color: white; padding: 12px; text-align: left; }
+        table td { padding: 12px; border-bottom: 1px solid #ddd; }
+        table tr:hover { background: #f5f5f5; }
+        ul, ol { margin: 15px 0 15px 30px; }
+        li { margin: 8px 0; }
+        .btn { display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; transition: background 0.3s; margin: 10px 5px; }
+        .btn:hover { background: #5a6fd8; }
+        footer { background: #2d3748; color: white; text-align: center; padding: 30px; }
+        @media print { nav { display: none; } .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Documentação Completa</h1>
+            <p style="font-size: 1.3em;">Quiz Administração v2.0</p>
+            <p>Sistema Educativo Interativo com Google Sheets</p>
+            <p style="margin-top: 10px;">Desenvolvido por Prof. Borges</p>
+        </header>
+
+        <nav>
+            <a href="#visao-geral">Visão Geral</a>
+            <a href="#login">Login</a>
+            <a href="#senhas">Senhas</a>
+            <a href="#google-sheets">Google Sheets</a>
+            <a href="#configuracao">Configuração</a>
+            <a href="#codigos">Códigos</a>
+            <a href="#uso">Como Usar</a>
+        </nav>
+
+        <div class="content">
+            <section id="visao-geral">
+                <h2>🎯 Visão Geral</h2>
+                <p><strong>Quiz Administração</strong> é uma plataforma educativa interativa com registro automático em Google Sheets.</p>
+                
+                <div class="success-box">
+                    <strong>✅ Novidades da Versão 2.0:</strong>
+                    <ul>
+                        <li>Formulário completo de login (Nome, Semestre, Turma, Período, Email)</li>
+                        <li>Integração automática com Google Sheets</li>
+                        <li>Registro de desempenho em tempo real</li>
+                        <li>Sistema de navegação completo</li>
+                        <li>Controle de acesso por senha</li>
+                    </ul>
+                </div>
+
+                <h3>Características</h3>
+                <ul>
+                    <li>3 níveis de dificuldade (Básico, Intermediário, Avançado)</li>
+                    <li>12 jogos educativos diferentes</li>
+                    <li>Sistema de pontuação global</li>
+                    <li>Registro centralizado em Google Sheets</li>
+                    <li>Acessível de qualquer lugar via link</li>
+                </ul>
+            </section>
+
+            <section id="login">
+                <h2>🔐 Sistema de Login</h2>
+                
+                <h3>Campos do Formulário</h3>
+                <table>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Tipo</th>
+                        <th>Opções</th>
+                        <th>Obrigatório</th>
+                    </tr>
+                    <tr>
+                        <td>Nome Completo</td>
+                        <td>Texto</td>
+                        <td>-</td>
+                        <td>✅ Sim</td>
+                    </tr>
+                    <tr>
+                        <td>Semestre</td>
+                        <td>Seleção</td>
+                        <td>1º ou 2º</td>
+                        <td>✅ Sim</td>
+                    </tr>
+                    <tr>
+                        <td>Turma</td>
+                        <td>Seleção</td>
+                        <td>A ou B</td>
+                        <td>✅ Sim</td>
+                    </tr>
+                    <tr>
+                        <td>Período</td>
+                        <td>Seleção</td>
+                        <td>Tarde ou Noite</td>
+                        <td>✅ Sim</td>
+                    </tr>
+                    <tr>
+                        <td>Email</td>
+                        <td>Email</td>
+                        <td>-</td>
+                        <td>❌ Não</td>
+                    </tr>
+                </table>
+
+                <div class="info-box">
+                    <strong>💡 Validação Automática:</strong> O sistema valida todos os campos e foca automaticamente no campo vazio.
+                </div>
+            </section>
+
+            <section id="senhas">
+                <h2>🔒 Sistema de Senhas</h2>
+                
+                <table>
+                    <tr>
+                        <th>Nível</th>
+                        <th>Senha Padrão</th>
+                        <th>Acesso</th>
+                    </tr>
+                    <tr>
+                        <td>📚 Básico</td>
+                        <td>Sem senha</td>
+                        <td>Livre</td>
+                    </tr>
+                    <tr>
+                        <td>🎓 Intermediário</td>
+                        <td><code>ADM2024</code></td>
+                        <td>Requer senha</td>
+                    </tr>
+                    <tr>
+                        <td>💼 Avançado</td>
+                        <td><code>GESTAO2024</code></td>
+                        <td>Requer senha</td>
+                    </tr>
+                </table>
+
+                <h3>Como Alterar Senhas</h3>
+                <p>No arquivo <code>index.html</code>, localize (linha ~430):</p>
+                <pre><code>const senhas = {
+    'intermediario': 'ADM2024',
+    'avancado': 'GESTAO2024'
+};</code></pre>
+            </section>
+
+            <section id="google-sheets">
+                <h2>📊 Google Sheets - Como Funciona</h2>
+                
+                <div class="success-box">
+                    <strong>✅ Fluxo Automático:</strong>
+                    <ol>
+                        <li>Aluno preenche formulário e clica "Confirmar e Entrar"</li>
+                        <li>Sistema envia dados automaticamente para Google Sheets</li>
+                        <li>Professor vê tudo em tempo real na planilha</li>
+                        <li>Não precisa exportar ou consolidar nada!</li>
+                    </ol>
+                </div>
+
+                <h3>Dados Registrados</h3>
+                <table>
+                    <tr>
+                        <th>Coluna</th>
+                        <th>Dado</th>
+                        <th>Exemplo</th>
+                    </tr>
+                    <tr><td>A</td><td>Nome</td><td>João Silva</td></tr>
+                    <tr><td>B</td><td>Semestre</td><td>1º Semestre</td></tr>
+                    <tr><td>C</td><td>Turma</td><td>Turma A</td></tr>
+                    <tr><td>D</td><td>Período</td><td>Noite</td></tr>
+                    <tr><td>E</td><td>Email</td><td>joao@email.com</td></tr>
+                    <tr><td>F</td><td>Data</td><td>20/01/2024</td></tr>
+                    <tr><td>G</td><td>Hora</td><td>14:30:25</td></tr>
+                    <tr><td>H</td><td>Pontuação</td><td>850</td></tr>
+                    <tr><td>I</td><td>Progresso</td><td>75%</td></tr>
+                    <tr><td>J</td><td>Jogos Completados</td><td>9</td></tr>
+                </table>
+            </section>
+
+            <section id="configuracao">
+                <h2>🛠️ Configuração Google Sheets</h2>
+                
+                <h3>Passo 1: Criar Planilha</h3>
+                <ol>
+                    <li>Acesse: <a href="https://sheets.google.com" target="_blank">sheets.google.com</a></li>
+                    <li>Clique em "+ Criar planilha em branco"</li>
+                    <li>Renomeie: "Quiz Administração - Acessos"</li>
+                </ol>
+
+                <h3>Passo 2: Cabeçalhos</h3>
+                <p>Na primeira linha, coloque:</p>
+                <div class="info-box">
+                    <strong>A1:</strong> Nome | <strong>B1:</strong> Semestre | <strong>C1:</strong> Turma | <strong>D1:</strong> Período | <strong>E1:</strong> Email<br>
+                    <strong>F1:</strong> Data | <strong>G1:</strong> Hora | <strong>H1:</strong> Pontuação | <strong>I1:</strong> Progresso | <strong>J1:</strong> Jogos Completados
+                </div>
+
+                <h3>Passo 3: Apps Script</h3>
+                <ol>
+                    <li>Na planilha: <strong>Extensões</strong> → <strong>Apps Script</strong></li>
+                    <li>Apague tudo e cole o código abaixo</li>
+                    <li>Clique em <strong>Salvar</strong> (💾)</li>
+                </ol>
+
+                <pre><code>function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+  
+  sheet.appendRow([
+    data.nome,
+    data.semestre,
+    data.turma,
+    data.periodo,
+    data.email,
+    data.data,
+    data.hora,
+    data.pontuacao || 0,
+    data.progresso || '0%',
+    data.jogosCompletados || 0
+  ]);
+  
+  return ContentService.createTextOutput(JSON.stringify({status: 'success'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</code></pre>
+
+                <h3>Passo 4: Implantar</h3>
+                <ol>
+                    <li><strong>Implantar</strong> → <strong>Nova implantação</strong></li>
+                    <li>Engrenagem ⚙️ → <strong>Aplicativo da Web</strong></li>
+                    <li><strong>Executar como:</strong> Eu</li>
+                    <li><strong>Quem tem acesso:</strong> Qualquer pessoa</li>
+                    <li>Clique em <strong>Implantar</strong></li>
+                    <li><strong>COPIE A URL</strong></li>
+                </ol>
+
+                <h3>Passo 5: Atualizar Código</h3>
+                <p>No <code>index.html</code>, localize:</p>
+                <pre><code>const GOOGLE_SCRIPT_URL = 'COLE_SUA_URL_AQUI';</code></pre>
+                <p>Substitua pela URL copiada.</p>
+
+                <div class="warning-box">
+                    <strong>⚠️ Importante:</strong> Sempre que alterar o script, faça uma NOVA IMPLANTAÇÃO (Gerenciar implantações → Editar → Nova versão).
+                </div>
+            </section>
+
+            <section id="codigos">
+                <h2>💻 Códigos Completos</h2>
+                
+                <h3>Função de Registro (index.html)</h3>
+                <pre><code>function registrarAcesso(nome, semestre, turma, periodo, email) {
+    const agora = new Date();
+    const stats = sistemaPontuacao.obterEstatisticas();
+    
+    const dados = {
+        nome: nome,
+        semestre: semestre,
+        turma: turma,
+        periodo: periodo,
+        email: email || 'Não informado',
+        data: agora.toLocaleDateString('pt-BR'),
+        hora: agora.toLocaleTimeString('pt-BR'),
+        pontuacao: stats.pontuacaoTotal,
+        progresso: stats.progresso + '%',
+        jogosCompletados: stats.jogosCompletados,
+        timestamp: agora.getTime()
+    };
+    
+    // Backup local
+    const acessos = JSON.parse(localStorage.getItem('relatorio_acessos') || '[]');
+    acessos.push(dados);
+    localStorage.setItem('relatorio_acessos', JSON.stringify(acessos));
+    
+    // Enviar para Google Sheets
+    fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+    }).catch(error => {
+        console.log('Dados salvos localmente.');
+    });
+}</code></pre>
+
+                <h3>Validação do Formulário</h3>
+                <pre><code>function confirmName() {
+    const name = document.getElementById('student-name').value.trim();
+    const semestre = document.getElementById('student-semestre').value;
+    const turma = document.getElementById('student-turma').value;
+    const periodo = document.getElementById('student-periodo').value;
+    const email = document.getElementById('student-email').value.trim();
+    
+    if (!name) { alert('Digite seu nome!'); return; }
+    if (!semestre) { alert('Selecione o semestre!'); return; }
+    if (!turma) { alert('Selecione a turma!'); return; }
+    if (!periodo) { alert('Selecione o período!'); return; }
+    
+    registrarAcesso(name, semestre, turma, periodo, email);
+    // ... continua
+}</code></pre>
+            </section>
+
+            <section id="uso">
+                <h2>🚀 Como Usar</h2>
+                
+                <h3>Para Professores</h3>
+                <ol>
+                    <li>Configure Google Sheets (passos acima)</li>
+                    <li>Altere senhas se necessário</li>
+                    <li>Suba no GitHub Pages</li>
+                    <li>Compartilhe o link com alunos</li>
+                    <li>Monitore a planilha em tempo real</li>
+                </ol>
+
+                <h3>Para Alunos</h3>
+                <ol>
+                    <li>Acesse o link fornecido</li>
+                    <li>Preencha todos os dados</li>
+                    <li>Escolha o nível</li>
+                    <li>Jogue e aprenda!</li>
+                </ol>
+
+                <div class="success-box">
+                    <strong>✅ Tudo Automático:</strong> Não precisa fazer nada manualmente. Os dados vão direto para a planilha!
+                </div>
+            </section>
+
+            <section id="deploy">
+                <h2>📦 Deploy no GitHub</h2>
+                
+                <h3>Arquivos para Subir</h3>
+                <div class="success-box">
+                    <strong>✅ Subir:</strong>
+                    <ul>
+                        <li>index.html</li>
+                        <li>sistema-pontuacao.js</li>
+                        <li>Todos os jogos (.html)</li>
+                        <li>Documentação (.md)</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <strong>❌ NÃO Subir:</strong>
+                    <ul>
+                        <li>admin.html (manter apenas local)</li>
+                    </ul>
+                </div>
+
+                <h3>Ativar GitHub Pages</h3>
+                <ol>
+                    <li>Repositório → <strong>Settings</strong> → <strong>Pages</strong></li>
+                    <li>Source: <strong>Deploy from a branch</strong></li>
+                    <li>Branch: <strong>main</strong> → <strong>/ (root)</strong></li>
+                    <li>Clique em <strong>Save</strong></li>
+                    <li>Aguarde alguns minutos</li>
+                    <li>Acesse: <code>https://seu-usuario.github.io/seu-repositorio/</code></li>
+                </ol>
+            </section>
+
+            <div class="no-print" style="text-align: center; margin: 40px 0;">
+                <a href="index.html" class="btn">🏠 Voltar ao Sistema</a>
+                <a href="#" onclick="window.print(); return false;" class="btn">🖨️ Imprimir</a>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Quiz Administração v2.0</strong></p>
+            <p>Sistema Educativo com Google Sheets</p>
+            <p style="margin-top: 10px;">Desenvolvido por Prof. Borges | Janeiro 2024</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,120 @@
+🎮 CONFIGURAÇÕES DO JOGO - ADMINISTRAÇÃO
+==========================================
+
+📋 INFORMAÇÕES GERAIS:
+- Total de perguntas: 15
+- Tempo por pergunta: Ilimitado
+- Sistema de pontuação: 1 ponto por acerto
+- Feedback: Imediato após cada resposta
+
+🎯 NÍVEIS DE DESEMPENHO:
+- 90-100%: Excelente (13-15 acertos)
+- 70-89%:  Muito Bom (11-12 acertos)
+- 50-69%:  Bom (8-10 acertos)
+- 0-49%:   Precisa Melhorar (0-7 acertos)
+
+🎨 PERSONALIZAÇÃO VISUAL:
+Para alterar cores, edite no arquivo HTML:
+- Cor principal: #667eea (azul)
+- Cor de acerto: #4CAF50 (verde)
+- Cor de erro: #f44336 (vermelho)
+- Fundo: Gradiente azul-roxo
+
+📚 TEMAS ABORDADOS:
+1. Funções Administrativas (Planejamento, Organização, Direção, Controle)
+2. Liderança e Tipos de Liderança
+3. Motivação (Teoria de Maslow, etc.)
+4. Estrutura Organizacional
+5. Comunicação Empresarial
+6. Eficiência vs Eficácia
+7. Delegação de Autoridade
+8. PDCA (Plan-Do-Check-Act)
+9. Planejamento Estratégico
+
+🔧 COMO PERSONALIZAR:
+
+Para Adicionar Perguntas:
+1. Abra o arquivo jogo-administracao.html
+2. Localize a seção "const questions = ["
+3. Adicione nova pergunta no formato:
+   {
+       question: "Sua pergunta?",
+       options: ["A", "B", "C", "D"],
+       correct: 0
+   }
+
+Para Alterar Mensagens de Feedback:
+- Linha ~200: Mensagens de resultado final
+- Edite os textos entre aspas
+
+Para Mudar Tempo Limite:
+- Adicione timer na função loadQuestion()
+- Implemente countdown visual
+
+🎓 SUGESTÕES PEDAGÓGICAS:
+
+Antes do Jogo:
+- Revise conceitos básicos
+- Explique o sistema de pontuação
+- Motive participação ativa
+
+Durante o Jogo:
+- Observe dificuldades comuns
+- Anote perguntas que geram dúvidas
+- Incentive discussão das respostas
+
+Após o Jogo:
+- Discuta respostas incorretas
+- Relacione com exemplos práticos
+- Planeje revisão dos temas com menor acerto
+
+📊 RELATÓRIO DE USO:
+Para acompanhar o desempenho da turma:
+1. Anote pontuações individuais
+2. Identifique perguntas com mais erros
+3. Calcule média da turma
+4. Planeje reforço nos temas difíceis
+
+🔄 VARIAÇÕES DO JOGO:
+
+Modo Competição:
+- Divida a turma em equipes
+- Cada equipe responde alternadamente
+- Equipe com mais pontos vence
+
+Modo Estudo:
+- Adicione explicações após cada resposta
+- Inclua links para material complementar
+- Permita múltiplas tentativas
+
+Modo Avaliação:
+- Registre tentativas por aluno
+- Defina nota mínima para aprovação
+- Gere relatório de desempenho
+
+💡 DICAS TÉCNICAS:
+
+Compatibilidade:
+- Funciona em todos os navegadores modernos
+- Responsivo para celulares e tablets
+- Não requer internet após carregamento
+
+Backup:
+- Sempre mantenha cópia do arquivo original
+- Teste alterações antes de usar em aula
+- Salve versões personalizadas com nomes diferentes
+
+Resolução de Problemas:
+- Se não carregar: Verifique se o arquivo não foi corrompido
+- Se não responder: Atualize a página
+- Se aparecer erro: Verifique sintaxe do JavaScript
+
+📞 SUPORTE:
+Para dúvidas sobre personalização ou uso:
+- Consulte o arquivo README.md
+- Verifique o arquivo perguntas-extras.js
+- Teste sempre em ambiente controlado
+
+==========================================
+Versão: 1.0 | Data: 2024
+Desenvolvido para fins educacionais

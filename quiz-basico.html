@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Básico - Administração</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .score {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .question {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            color: #333;
+            border-left: 5px solid #667eea;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            background: #e3f2fd;
+            border: 2px solid #bbdefb;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            background: #bbdefb;
+            transform: translateY(-2px);
+        }
+
+        .option.correct {
+            background: #c8e6c9;
+            border-color: #4CAF50;
+            color: #2e7d32;
+        }
+
+        .option.incorrect {
+            background: #ffcdd2;
+            border-color: #f44336;
+            color: #c62828;
+        }
+
+        .next-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .next-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .next-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .final-score {
+            font-size: 2em;
+            color: #4CAF50;
+            margin: 20px 0;
+        }
+
+        .restart-btn, .home-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin: 10px;
+        }
+
+        .restart-btn:hover, .home-btn:hover {
+            background: #ff5252;
+        }
+
+        .home-btn {
+            background: #667eea;
+        }
+
+        .home-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .gabarito-item {
+            background: #f8f9fa;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: left;
+        }
+        
+        .gabarito-item.correct {
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .gabarito-item.incorrect {
+            border-left: 5px solid #f44336;
+        }
+
+        .progress {
+            background: #e0e0e0;
+            height: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: #4CAF50;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="home-btn" onclick="goHome()" style="margin-bottom: 20px;">⬅️ Voltar ao Menu</button>
+        <h1>📚 Quiz Básico</h1>
+        
+        <div id="game-area">
+            <div class="score">
+                Pontuação: <span id="score">0</span> / <span id="total">0</span>
+            </div>
+            
+            <div class="progress">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            
+            <div class="question" id="question"></div>
+            
+            <div class="options" id="options"></div>
+            
+            <button class="next-btn" id="next-btn" onclick="nextQuestion()" disabled>
+                Próxima Pergunta
+            </button>
+        </div>
+        
+        <div id="final-screen" style="display: none;">
+            <div class="final-score" id="final-score"></div>
+            <p id="final-message"></p>
+            <button class="restart-btn" onclick="restartGame()">Jogar Novamente</button>
+            <button class="next-btn" onclick="proximoJogo()">Próximo Jogo</button>
+            <button class="home-btn" onclick="goHome()">Voltar ao Menu</button>
+            <button class="restart-btn" onclick="showGabarito()">Ver Gabarito</button>
+        </div>
+        
+        <div id="gabarito-screen" style="display: none;">
+            <h2>📋 Gabarito</h2>
+            <div id="gabarito-content"></div>
+            <button class="home-btn" onclick="backToFinal()">Voltar</button>
+        </div>
+    </div>
+
+    <script src="sistema-pontuacao.js"></script>
+    <script>
+        const questions = [
+            {
+                question: "Quais são os 4 grupos de habilidades do profissional do futuro?",
+                options: [
+                    "Sociais, Emocionais, Técnicas e Estratégicas",
+                    "Comunicação, Liderança, Vendas e Marketing",
+                    "Planejamento, Organização, Direção e Controle",
+                    "Básicas, Intermediárias, Avançadas e Especializadas"
+                ],
+                correct: 0
+            },
+            {
+                question: "O que significa 'habilidade' segundo sua origem latina?",
+                options: [
+                    "Conhecimento teórico",
+                    "Capaz, aptus ou habeo (ter, possuir)",
+                    "Experiência prática",
+                    "Competência técnica"
+                ],
+                correct: 1
+            },
+            {
+                question: "Quais são as 4 funções básicas da administração (PODC)?",
+                options: [
+                    "Produzir, Organizar, Dirigir, Comercializar",
+                    "Planejar, Organizar, Dirigir, Controlar",
+                    "Planejar, Operar, Decidir, Comunicar",
+                    "Processar, Organizar, Delegar, Coordenar"
+                ],
+                correct: 1
+            },
+            {
+                question: "Qual a diferença entre eficiência e eficácia?",
+                options: [
+                    "Não há diferença",
+                    "Eficiência são os meios, eficácia são os objetivos",
+                    "Eficiência é mais importante",
+                    "Eficácia é fazer rápido"
+                ],
+                correct: 1
+            },
+            {
+                question: "Quais são as habilidades que compõem as Habilidades Sociais?",
+                options: [
+                    "Apenas comunicação e liderança",
+                    "Comunicação, Inteligência Emocional, Liderança, Colaboração, Flexibilidade, Negociação, Networking",
+                    "Somente técnicas de vendas",
+                    "Conhecimentos de informática"
+                ],
+                correct: 1
+            },
+            {
+                question: "O que é comunicação eficaz e estratégica?",
+                options: [
+                    "Falar alto e claro",
+                    "Falar e ser compreendido, sem ruídos, sem desentendimentos",
+                    "Usar palavras difíceis",
+                    "Comunicar apenas por escrito"
+                ],
+                correct: 1
+            },
+            {
+                question: "Quantos são os sinais de inteligência emocional mencionados?",
+                options: [
+                    "5 sinais",
+                    "10 sinais",
+                    "8 sinais",
+                    "12 sinais"
+                ],
+                correct: 2
+            },
+            {
+                question: "Quais são os principais departamentos de uma empresa?",
+                options: [
+                    "Apenas Administrativo e Comercial",
+                    "Administrativo, Comercial, Financeiro, RH, Marketing, Jurídico",
+                    "Somente Vendas e Produção",
+                    "Apenas RH e Financeiro"
+                ],
+                correct: 1
+            },
+            {
+                question: "Qual a principal função do Assistente Administrativo?",
+                options: [
+                    "Apenas atender telefone",
+                    "Fornecer suporte em várias áreas, permitindo que outras equipes se concentrem em suas funções principais",
+                    "Somente arquivar documentos",
+                    "Apenas fazer café"
+                ],
+                correct: 1
+            },
+            {
+                question: "Segundo a definição de Stoner, o que é Administração?",
+                options: [
+                    "Apenas gerenciar pessoas",
+                    "O processo de Planejar, Organizar, Liderar e Controlar esforços para alcançar objetivos",
+                    "Somente controlar gastos",
+                    "Apenas tomar decisões"
+                ],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswer = null;
+        let userAnswers = [];
+        let shuffledQuestions = [];
+
+        function loadQuestion() {
+            const question = shuffledQuestions[currentQuestion];
+            document.getElementById('question').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            document.getElementById('next-btn').disabled = true;
+            selectedAnswer = null;
+            
+            const progress = ((currentQuestion) / shuffledQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            
+            document.getElementById('total').textContent = shuffledQuestions.length;
+        }
+
+        function selectAnswer(index) {
+            if (selectedAnswer !== null) return;
+            
+            selectedAnswer = index;
+            const options = document.querySelectorAll('.option');
+            const question = shuffledQuestions[currentQuestion];
+            
+            options.forEach((option, i) => {
+                if (i === question.correct) {
+                    option.classList.add('correct');
+                } else if (i === index && i !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            if (index === question.correct) {
+                score++;
+                document.getElementById('score').textContent = score;
+            }
+            
+            userAnswers[currentQuestion] = {
+                selected: index,
+                correct: question.correct,
+                isCorrect: index === question.correct
+            };
+            
+            document.getElementById('next-btn').disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion < shuffledQuestions.length) {
+                loadQuestion();
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function showFinalScore() {
+            document.getElementById('game-area').style.display = 'none';
+            document.getElementById('final-screen').style.display = 'block';
+            
+            const percentage = (score / shuffledQuestions.length) * 100;
+            document.getElementById('final-score').textContent = `${score}/${shuffledQuestions.length} (${percentage.toFixed(1)}%)`;
+            
+            // Calcular pontos (máximo 100 pontos)
+            const pontos = Math.round((score / shuffledQuestions.length) * 100);
+            const resultado = sistemaPontuacao.adicionarPontos('quiz-basico', pontos, 100);
+            
+            let message = '';
+            if (percentage >= 90) {
+                message = '🏆 Excelente! Você domina os conceitos básicos!';
+            } else if (percentage >= 70) {
+                message = '👏 Muito bom! Bom conhecimento básico!';
+            } else if (percentage >= 50) {
+                message = '📚 Continue estudando os fundamentos!';
+            } else {
+                message = '💪 Revise os conceitos básicos!';
+            }
+            
+            // Atualizar progresso do nível
+            const progresso = JSON.parse(localStorage.getItem('progresso_niveis') || '{}');
+            progresso.basico = Math.max(progresso.basico || 0, percentage);
+            localStorage.setItem('progresso_niveis', JSON.stringify(progresso));
+            
+            if (resultado.melhorPontuacao) {
+                message += ` ✨ Nova melhor pontuação: ${pontos} pontos!`;
+            }
+            
+            message += ` Total: ${resultado.pontuacaoTotal} pontos (${resultado.progresso}% completo)`;
+            
+            // Verificar se atingiu o mínimo para avançar
+            if (percentage < 70) {
+                message += `\n\n⚠️ Para passar para o próximo nível, você deve atingir o mínimo de 7 (70%), tente novamente. Você consegue!`;
+            } else {
+                message += `\n\n✅ Parabéns! Você desbloqueou o nível Intermediário!`;
+            }
+            
+            document.getElementById('final-message').textContent = message;
+        }
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+        
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            selectedAnswer = null;
+            userAnswers = [];
+            
+            // Embaralhar perguntas para novo jogo
+            shuffledQuestions = shuffleArray(questions);
+            
+            document.getElementById('score').textContent = '0';
+            document.getElementById('game-area').style.display = 'block';
+            document.getElementById('final-screen').style.display = 'none';
+            document.getElementById('gabarito-screen').style.display = 'none';
+            
+            loadQuestion();
+        }
+
+        function goHome() {
+            window.location.href = 'index.html#basico';
+        }
+        
+        function proximoJogo() {
+            // Lista dos jogos do nível básico
+            const jogosBasicos = [
+                'quiz-basico.html',
+                'jogo-memoria.html', 
+                'jogo-arrastar.html',
+                'jogo-lacunas.html',
+                'jogo-caca-palavras.html',
+                'jogo-ligar-pontos.html',
+                'jogo-completar-frases.html',
+                'jogo-forca.html'
+            ];
+            
+            const jogoAtual = window.location.pathname.split('/').pop();
+            const indiceAtual = jogosBasicos.indexOf(jogoAtual);
+            
+            if (indiceAtual < jogosBasicos.length - 1) {
+                // Vai para o próximo jogo
+                window.location.href = jogosBasicos[indiceAtual + 1];
+            } else {
+                // Último jogo, volta para o menu do básico
+                window.location.href = 'index.html#basico';
+            }
+        }
+        
+        function showGabarito() {
+            document.getElementById('final-screen').style.display = 'none';
+            document.getElementById('gabarito-screen').style.display = 'block';
+            
+            const gabaritoContent = document.getElementById('gabarito-content');
+            gabaritoContent.innerHTML = '';
+            
+            shuffledQuestions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const div = document.createElement('div');
+                div.className = `gabarito-item ${userAnswer.isCorrect ? 'correct' : 'incorrect'}`;
+                
+                div.innerHTML = `
+                    <strong>Pergunta ${index + 1}:</strong> ${question.question}<br>
+                    <strong>Sua resposta:</strong> ${question.options[userAnswer.selected]} ${userAnswer.isCorrect ? '✅' : '❌'}<br>
+                    <strong>Resposta correta:</strong> ${question.options[userAnswer.correct]}
+                `;
+                
+                gabaritoContent.appendChild(div);
+            });
+        }
+        
+        function backToFinal() {
+            document.getElementById('gabarito-screen').style.display = 'none';
+            document.getElementById('final-screen').style.display = 'block';
+        }
+        
+        function playAudio(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'pt-BR';
+                utterance.rate = 0.9;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function initGame() {
+            shuffledQuestions = shuffleArray(questions);
+            loadQuestion();
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            playAudio('Bem-vindo ao Quiz Básico de Administração!');
+            initGame();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Forca - Administração</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        h1 {
+            color: #4a5568;
+            margin-bottom: 20px;
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .hangman {
+            font-family: monospace;
+            font-size: 1.5em;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            white-space: pre-line;
+            min-height: 200px;
+        }
+        
+        .word-display {
+            font-size: 2em;
+            font-weight: bold;
+            letter-spacing: 10px;
+            margin: 20px 0;
+            color: #4a5568;
+        }
+        
+        .hint {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            color: #1976d2;
+        }
+        
+        .alphabet {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+            gap: 5px;
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+        
+        .letter-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+        }
+        
+        .letter-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .letter-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .letter-btn.correct {
+            background: #4CAF50;
+        }
+        
+        .letter-btn.incorrect {
+            background: #f44336;
+        }
+        
+        .home-btn, .restart-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        .restart-btn {
+            background: #ff6b6b;
+        }
+        
+        .game-over {
+            display: none;
+            font-size: 1.5em;
+            margin: 20px 0;
+        }
+        
+        .win {
+            color: #4CAF50;
+        }
+        
+        .lose {
+            color: #f44336;
+        }
+        
+        .next-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        .next-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎪 Jogo da Forca - Administração</h1>
+        
+        <div class="game-info">
+            <span>Erros: <span id="errors">0</span>/6</span>
+            <span>Pontos: <span id="points">0</span></span>
+        </div>
+        
+        <div class="hangman" id="hangman"></div>
+        
+        <div class="word-display" id="word-display"></div>
+        
+        <div class="hint" id="hint"></div>
+        
+        <div class="alphabet" id="alphabet"></div>
+        
+        <div class="game-over" id="game-over"></div>
+        
+        <button class="restart-btn" onclick="newGame()">Nova Palavra</button>
+        <button class="next-btn" id="next-btn" onclick="proximoJogo()" disabled>Próximo Jogo</button>
+        <button class="home-btn" onclick="goHome()">Voltar ao Menu</button>
+    </div>
+
+    <script src="sistema-pontuacao.js"></script>
+    <script>
+        const words = [
+            { word: "HABILIDADE", hint: "Capacidade de fazer algo, realizar uma tarefa (origem latina: habilis)" },
+            { word: "COMUNICACAO", hint: "Falar e ser compreendido, sem ruídos, sem desentendimentos" },
+            { word: "PLANEJAR", hint: "Função administrativa que envolve definir metas e objetivos" },
+            { word: "ORGANIZAR", hint: "Função administrativa que estrutura recursos e atividades" },
+            { word: "DIRIGIR", hint: "Função administrativa que envolve liderar e motivar pessoas" },
+            { word: "CONTROLAR", hint: "Função administrativa que verifica se resultados estão conforme planejado" },
+            { word: "EFICIENCIA", hint: "Fazer as coisas bem e corretamente, relaciona-se com os meios" },
+            { word: "EFICACIA", hint: "Atingir objetivos, relaciona-se com os fins e propósitos" },
+            { word: "ASSISTENTE", hint: "Profissional que fornece suporte em várias áreas da empresa" },
+            { word: "DEPARTAMENTO", hint: "Divisão da empresa encarregada de atividades específicas" }
+        ];
+
+        const hangmanStages = [
+            "",
+            "  +---+\n      |\n      |\n      |\n      |\n      |\n=========",
+            "  +---+\n  |   |\n      |\n      |\n      |\n      |\n=========",
+            "  +---+\n  |   |\n  O   |\n      |\n      |\n      |\n=========",
+            "  +---+\n  |   |\n  O   |\n  |   |\n      |\n      |\n=========",
+            "  +---+\n  |   |\n  O   |\n /|   |\n      |\n      |\n=========",
+            "  +---+\n  |   |\n  O   |\n /|\\  |\n      |\n      |\n=========",
+            "  +---+\n  |   |\n  O   |\n /|\\  |\n /    |\n      |\n=========",
+            "  +---+\n  |   |\n  O   |\n /|\\  |\n / \\  |\n      |\n========="
+        ];
+
+        let currentWord = "";
+        let currentHint = "";
+        let guessedWord = [];
+        let wrongGuesses = 0;
+        let points = 0;
+        let usedLetters = [];
+        let wordsCompleted = 0;
+
+        function newGame(resetAll = true) {
+            if (resetAll) {
+                wordsCompleted = 0;
+                points = 0;
+                document.getElementById('next-btn').disabled = true;
+            }
+            
+            const randomIndex = Math.floor(Math.random() * words.length);
+            currentWord = words[randomIndex].word;
+            currentHint = words[randomIndex].hint;
+            
+            guessedWord = Array(currentWord.length).fill('_');
+            wrongGuesses = 0;
+            usedLetters = [];
+            
+            updateDisplay();
+            createAlphabet();
+            
+            document.getElementById('game-over').style.display = 'none';
+            
+            if (resetAll) {
+                playAudio('Bem-vindo ao jogo da forca! Complete 6 palavras para ganhar!');
+            } else {
+                playAudio(`Palavra ${wordsCompleted + 1} de 6. Dica: ${currentHint}`);
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('word-display').textContent = guessedWord.join(' ');
+            document.getElementById('hint').textContent = `Palavra ${wordsCompleted + 1}/6 - Dica: ${currentHint}`;
+            document.getElementById('errors').textContent = wrongGuesses;
+            document.getElementById('points').textContent = `${wordsCompleted}/6`;
+            document.getElementById('hangman').textContent = hangmanStages[wrongGuesses];
+        }
+
+        function createAlphabet() {
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const alphabetContainer = document.getElementById('alphabet');
+            alphabetContainer.innerHTML = '';
+            
+            for (let letter of alphabet) {
+                const button = document.createElement('button');
+                button.className = 'letter-btn';
+                button.textContent = letter;
+                button.onclick = () => guessLetter(letter, button);
+                alphabetContainer.appendChild(button);
+            }
+        }
+
+        function guessLetter(letter, button) {
+            if (usedLetters.includes(letter)) return;
+            
+            usedLetters.push(letter);
+            button.disabled = true;
+            
+            if (currentWord.includes(letter)) {
+                // Letra correta
+                button.classList.add('correct');
+                
+                for (let i = 0; i < currentWord.length; i++) {
+                    if (currentWord[i] === letter) {
+                        guessedWord[i] = letter;
+                    }
+                }
+                
+                playAudio('Correto!');
+                
+                // Verificar se ganhou
+                if (!guessedWord.includes('_')) {
+                    wordsCompleted++;
+                    points += 10;
+                    
+                    if (wordsCompleted < 6) {
+                        playAudio(`Parabéns! Palavra ${wordsCompleted} de 6 completa! Próxima palavra...`);
+                        setTimeout(() => {
+                            newGame(false);
+                        }, 2000);
+                    } else {
+                        // Jogo completo
+                        const pontosJogo = Math.round((points / 60) * 100);
+                        const resultado = sistemaPontuacao.adicionarPontos('forca', pontosJogo, 100);
+                        
+                        document.getElementById('next-btn').disabled = false;
+                        
+                        let message = `Parabéns! Você completou todas as 6 palavras! Pontos: ${pontosJogo}`;
+                        if (resultado.melhorPontuacao) {
+                            message += ` ✨ Nova melhor pontuação!`;
+                        }
+                        message += ` Total: ${resultado.pontuacaoTotal} pontos`;
+                        
+                        document.getElementById('game-over').innerHTML = `
+                            <div class="win">🎉 Parabéns! Jogo completo!</div>
+                            <p>${message}</p>
+                            <div style="margin: 10px 0;">
+                                <div id="progresso-forca"></div>
+                            </div>
+                        `;
+                        
+                        document.getElementById('game-over').style.display = 'block';
+                        criarBarraProgresso('progresso-forca', resultado.progresso, 'Progresso Geral');
+                        
+                        playAudio('Parabéns! Você domina os conceitos básicos de administração!');
+                    }
+                }
+            } else {
+                // Letra incorreta
+                button.classList.add('incorrect');
+                wrongGuesses++;
+                
+                if (wrongGuesses >= 6) {
+                    document.getElementById('game-over').innerHTML = `<div class="lose">😵 Você perdeu! A palavra era: ${currentWord}</div>`;
+                    document.getElementById('game-over').style.display = 'block';
+                    playAudio(`Você perdeu! A palavra era ${currentWord}. Tente novamente!`);
+                    
+                    // Desabilitar todas as letras
+                    document.querySelectorAll('.letter-btn').forEach(btn => {
+                        btn.disabled = true;
+                    });
+                } else {
+                    playAudio('Letra incorreta!');
+                }
+            }
+            
+            updateDisplay();
+        }
+
+        function playAudio(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'pt-BR';
+                utterance.rate = 0.9;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function goHome() {
+            window.location.href = 'index.html#basico';
+        }
+        
+        function proximoJogo() {
+            const jogosBasicos = [
+                'quiz-basico.html',
+                'jogo-memoria.html', 
+                'jogo-arrastar.html',
+                'jogo-lacunas-basico.html',
+                'jogo-caca-palavras.html',
+                'jogo-ligar-pontos.html',
+                'jogo-completar-frases.html',
+                'jogo-forca.html'
+            ];
+            const jogoAtual = window.location.pathname.split('/').pop();
+            const indiceAtual = jogosBasicos.indexOf(jogoAtual);
+            
+            if (indiceAtual < jogosBasicos.length - 1) {
+                window.location.href = jogosBasicos[indiceAtual + 1];
+            } else {
+                window.location.href = 'index.html#basico';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            newGame();
+            playAudio('Bem-vindo ao jogo da forca de administração! Descubra a palavra usando as dicas!');
+        });
+
+        // Permitir digitação no teclado
+        document.addEventListener('keydown', (e) => {
+            const letter = e.key.toUpperCase();
+            if (letter >= 'A' && letter <= 'Z') {
+                const button = Array.from(document.querySelectorAll('.letter-btn')).find(btn => btn.textContent === letter);
+                if (button && !button.disabled) {
+                    guessLetter(letter, button);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

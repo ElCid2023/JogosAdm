@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preencher Lacunas - Administração</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        h1 {
+            color: #4a5568;
+            margin-bottom: 20px;
+        }
+        
+        .score {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .sentence {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            line-height: 1.6;
+            text-align: left;
+        }
+        
+        .blank {
+            display: inline-block;
+            min-width: 120px;
+            padding: 5px 10px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            background: white;
+            font-size: 1em;
+            text-align: center;
+            margin: 0 5px;
+        }
+        
+        .blank.correct {
+            background: #c8e6c9;
+            border-color: #4CAF50;
+        }
+        
+        .blank.incorrect {
+            background: #ffcdd2;
+            border-color: #f44336;
+        }
+        
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .option {
+            background: #e3f2fd;
+            border: 2px solid #bbdefb;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+        
+        .option:hover {
+            background: #bbdefb;
+            transform: translateY(-2px);
+        }
+        
+        .option.used {
+            background: #e0e0e0;
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        .check-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        .next-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        .home-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        .final-screen {
+            display: none;
+        }
+        
+        .final-score {
+            font-size: 2em;
+            color: #4CAF50;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Preencher Lacunas - Administração</h1>
+        
+        <div id="game-area">
+            <div class="score">
+                Pontuação: <span id="score">0</span> / <span id="total">5</span>
+            </div>
+            
+            <div class="sentence" id="sentence"></div>
+            
+            <div class="options" id="options"></div>
+            
+            <button class="check-btn" onclick="checkAnswers()">Verificar</button>
+            <button class="next-btn" onclick="nextSentence()" style="display: none;">Próxima</button>
+        </div>
+        
+        <div id="final-screen" class="final-screen">
+            <div class="final-score" id="final-score"></div>
+            <p id="final-message"></p>
+            <button class="next-btn" onclick="restartGame()">Jogar Novamente</button>
+            <button class="home-btn" onclick="goHome()">Voltar ao Menu</button>
+        </div>
+    </div>
+
+    <script src="sistema-pontuacao.js"></script>
+    <script>
+        const sentences = [
+            {
+                text: "As quatro funções básicas da administração são: _____, _____, dirigir e _____.",
+                blanks: ["planejar", "organizar", "controlar"],
+                options: ["planejar", "organizar", "controlar", "vender", "comprar", "produzir"]
+            },
+            {
+                text: "A _____ significa fazer as coisas da maneira correta, enquanto a _____ significa fazer as coisas certas.",
+                blanks: ["eficiência", "eficácia"],
+                options: ["eficiência", "eficácia", "produtividade", "qualidade", "rapidez", "economia"]
+            },
+            {
+                text: "O _____ é uma representação visual da estrutura hierárquica da empresa, mostrando as relações de _____.",
+                blanks: ["organograma", "autoridade"],
+                options: ["organograma", "autoridade", "fluxograma", "cronograma", "poder", "responsabilidade"]
+            },
+            {
+                text: "A _____ é o processo de influenciar pessoas para alcançar objetivos comuns, enquanto a _____ são as forças que impulsionam o comportamento.",
+                blanks: ["liderança", "motivação"],
+                options: ["liderança", "motivação", "chefia", "comando", "inspiração", "energia"]
+            },
+            {
+                text: "O planejamento _____ estabelece a direção de longo prazo da organização, definindo sua _____ e objetivos gerais.",
+                blanks: ["estratégico", "missão"],
+                options: ["estratégico", "missão", "operacional", "tático", "visão", "meta"]
+            }
+        ];
+
+        let currentSentence = 0;
+        let score = 0;
+        let selectedBlanks = [];
+
+        function loadSentence() {
+            const sentence = sentences[currentSentence];
+            let sentenceHTML = sentence.text;
+            
+            // Substituir underscores por inputs
+            sentence.blanks.forEach((blank, index) => {
+                sentenceHTML = sentenceHTML.replace('_____', 
+                    `<input type="text" class="blank" id="blank-${index}" readonly onclick="selectBlank(${index})">`
+                );
+            });
+            
+            document.getElementById('sentence').innerHTML = sentenceHTML;
+            
+            // Criar opções
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            // Embaralhar opções
+            const shuffledOptions = [...sentence.options].sort(() => Math.random() - 0.5);
+            
+            shuffledOptions.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.onclick = () => selectOption(option, optionElement);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            selectedBlanks = new Array(sentence.blanks.length).fill('');
+            document.querySelector('.check-btn').style.display = 'inline-block';
+            document.querySelector('.next-btn').style.display = 'none';
+        }
+
+        let selectedBlankIndex = -1;
+
+        function selectBlank(index) {
+            selectedBlankIndex = index;
+            // Destacar blank selecionado
+            document.querySelectorAll('.blank').forEach((blank, i) => {
+                blank.style.borderColor = i === index ? '#ff6b6b' : '#667eea';
+            });
+        }
+
+        function selectOption(option, optionElement) {
+            if (selectedBlankIndex === -1 || optionElement.classList.contains('used')) {
+                playAudio('Selecione uma lacuna primeiro!');
+                return;
+            }
+            
+            const blankInput = document.getElementById(`blank-${selectedBlankIndex}`);
+            blankInput.value = option;
+            selectedBlanks[selectedBlankIndex] = option;
+            
+            optionElement.classList.add('used');
+            selectedBlankIndex = -1;
+            
+            // Resetar bordas
+            document.querySelectorAll('.blank').forEach(blank => {
+                blank.style.borderColor = '#667eea';
+            });
+        }
+
+        function checkAnswers() {
+            const sentence = sentences[currentSentence];
+            let correct = 0;
+            
+            sentence.blanks.forEach((correctAnswer, index) => {
+                const blankInput = document.getElementById(`blank-${index}`);
+                if (selectedBlanks[index] === correctAnswer) {
+                    blankInput.classList.add('correct');
+                    correct++;
+                } else {
+                    blankInput.classList.add('incorrect');
+                    blankInput.value = correctAnswer; // Mostrar resposta correta
+                }
+            });
+            
+            if (correct === sentence.blanks.length) {
+                score++;
+                document.getElementById('score').textContent = score;
+                playAudio('Perfeito! Todas as lacunas estão corretas!');
+            } else {
+                playAudio(`Você acertou ${correct} de ${sentence.blanks.length} lacunas.`);
+            }
+            
+            document.querySelector('.check-btn').style.display = 'none';
+            document.querySelector('.next-btn').style.display = 'inline-block';
+        }
+
+        function nextSentence() {
+            currentSentence++;
+            
+            if (currentSentence < sentences.length) {
+                loadSentence();
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function showFinalScore() {
+            document.getElementById('game-area').style.display = 'none';
+            document.getElementById('final-screen').style.display = 'block';
+            
+            const percentage = (score / sentences.length) * 100;
+            document.getElementById('final-score').textContent = `${score}/${sentences.length} (${percentage.toFixed(1)}%)`;
+            
+            const pontos = Math.round((score / sentences.length) * 100);
+            const resultado = sistemaPontuacao.adicionarPontos('lacunas', pontos, 100);
+            
+            let message = '';
+            if (percentage >= 80) {
+                message = '🏆 Excelente! Você domina os conceitos!';
+            } else if (percentage >= 60) {
+                message = '👏 Muito bom! Continue praticando!';
+            } else {
+                message = '📚 Continue estudando os conceitos!';
+            }
+            
+            if (resultado.melhorPontuacao) {
+                message += ` ✨ Nova melhor pontuação: ${pontos} pontos!`;
+            }
+            message += ` Total: ${resultado.pontuacaoTotal} pontos (${resultado.progresso}% completo)`;
+            
+            document.getElementById('final-message').innerHTML = `
+                ${message}
+                <div style="margin: 15px 0;">
+                    <div id="progresso-lacunas"></div>
+                </div>
+            `;
+            
+            criarBarraProgresso('progresso-lacunas', resultado.progresso, 'Progresso Geral');
+            
+            playAudio(message);
+        }
+
+        function restartGame() {
+            currentSentence = 0;
+            score = 0;
+            document.getElementById('score').textContent = score;
+            document.getElementById('game-area').style.display = 'block';
+            document.getElementById('final-screen').style.display = 'none';
+            loadSentence();
+        }
+
+        function playAudio(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'pt-BR';
+                utterance.rate = 0.9;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function goHome() {
+            window.location.href = 'index.html#basico';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSentence();
+            playAudio('Bem-vindo ao jogo de preencher lacunas! Selecione uma lacuna e depois clique na palavra correta!');
+        });
+    </script>
+</body>
+</html>

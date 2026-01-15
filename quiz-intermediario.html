@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Intermediário - Administração</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .score {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .question {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            color: #333;
+            border-left: 5px solid #667eea;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            background: #e3f2fd;
+            border: 2px solid #bbdefb;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            background: #bbdefb;
+            transform: translateY(-2px);
+        }
+
+        .option.correct {
+            background: #c8e6c9;
+            border-color: #4CAF50;
+            color: #2e7d32;
+        }
+
+        .option.incorrect {
+            background: #ffcdd2;
+            border-color: #f44336;
+            color: #c62828;
+        }
+
+        .next-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .next-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .next-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .final-score {
+            font-size: 2em;
+            color: #4CAF50;
+            margin: 20px 0;
+        }
+
+        .restart-btn, .home-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin: 10px;
+        }
+
+        .restart-btn:hover, .home-btn:hover {
+            background: #ff5252;
+        }
+
+        .home-btn {
+            background: #667eea;
+        }
+
+        .home-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .progress {
+            background: #e0e0e0;
+            height: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: #4CAF50;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="home-btn" onclick="goHome()" style="margin-bottom: 20px;">⬅️ Voltar ao Menu</button>
+        <h1>🎓 Quiz Intermediário</h1>
+        
+        <div id="game-area">
+            <div class="score">
+                Pontuação: <span id="score">0</span> / <span id="total">0</span>
+            </div>
+            
+            <div class="progress">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            
+            <div class="question" id="question"></div>
+            
+            <div class="options" id="options"></div>
+            
+            <button class="next-btn" id="next-btn" onclick="nextQuestion()" disabled>
+                Próxima Pergunta
+            </button>
+        </div>
+        
+        <div id="final-screen" style="display: none;">
+            <div class="final-score" id="final-score"></div>
+            <p id="final-message"></p>
+            <button class="restart-btn" onclick="restartGame()">Jogar Novamente</button>
+            <button class="home-btn" onclick="goHome()">Voltar ao Menu</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Toda empresa precisa definir seus objetivos empresariais. Quais são?",
+                options: [
+                    "Lucro, Crescimento e Expansão",
+                    "Missão, Visão e Valores",
+                    "Vendas, Marketing e Produção",
+                    "Planejamento, Organização e Controle"
+                ],
+                correct: 1
+            },
+            {
+                question: "O que responde a pergunta 'Por que existimos? O que fazemos? Para quem fazemos?'",
+                options: [
+                    "Visão",
+                    "Missão",
+                    "Valores",
+                    "Objetivos"
+                ],
+                correct: 1
+            },
+            {
+                question: "O que responde a pergunta 'Onde queremos chegar? Como queremos ser reconhecidos?'",
+                options: [
+                    "Missão",
+                    "Visão",
+                    "Valores",
+                    "Estratégia"
+                ],
+                correct: 1
+            },
+            {
+                question: "Quais são os níveis de objetivos?",
+                options: [
+                    "Baixo, Médio e Alto",
+                    "Operacionais (0-2 anos), Táticos (2-5 anos), Estratégicos (5+ anos)",
+                    "Curto, Médio e Longo",
+                    "Simples, Complexo e Avançado"
+                ],
+                correct: 1
+            },
+            {
+                question: "O que significa SMART?",
+                options: [
+                    "Sistema de Metas Avançadas",
+                    "Específico, Mensurável, Atingível, Relevante, Tempo definido",
+                    "Simples, Moderno, Ativo, Rápido, Total",
+                    "Seguro, Modular, Adaptado, Robusto, Tecnológico"
+                ],
+                correct: 1
+            },
+            {
+                question: "O que é análise SWOT?",
+                options: [
+                    "Sistema de vendas",
+                    "Forças, Fraquezas, Oportunidades e Ameaças",
+                    "Planejamento financeiro",
+                    "Gestão de pessoas"
+                ],
+                correct: 1
+            },
+            {
+                question: "O que significa 5W2H?",
+                options: [
+                    "5 Palavras e 2 Horas",
+                    "What, When, Where, Why, Who, How, How much",
+                    "5 Semanas e 2 Habilidades",
+                    "5 Workshops e 2 Habitações"
+                ],
+                correct: 1
+            },
+            {
+                question: "Quem é a pessoa mais importante nas relações de consumo?",
+                options: [
+                    "O gerente",
+                    "O cliente",
+                    "O proprietário",
+                    "O fornecedor"
+                ],
+                correct: 1
+            },
+            {
+                question: "Qual a fórmula de satisfação do cliente?",
+                options: [
+                    "Preço + Qualidade",
+                    "Ser Recebido + Sentir-se Acolhido + Ter necessidade Atendida",
+                    "Produto + Serviço",
+                    "Vendas + Marketing"
+                ],
+                correct: 1
+            },
+            {
+                question: "Quais são os tipos de arquivo segundo temporalidade?",
+                options: [
+                    "Pequeno, Médio e Grande",
+                    "Ativo, Inativo, Dinâmico e Histórico",
+                    "Digital, Físico e Virtual",
+                    "Público, Privado e Confidencial"
+                ],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswer = null;
+        let shuffledQuestions = [];
+
+        function loadQuestion() {
+            const question = shuffledQuestions[currentQuestion];
+            document.getElementById('question').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            document.getElementById('next-btn').disabled = true;
+            selectedAnswer = null;
+            
+            const progress = ((currentQuestion) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            
+            document.getElementById('total').textContent = questions.length;
+        }
+
+        function selectAnswer(index) {
+            if (selectedAnswer !== null) return;
+            
+            selectedAnswer = index;
+            const options = document.querySelectorAll('.option');
+            const question = shuffledQuestions[currentQuestion];
+            
+            options.forEach((option, i) => {
+                if (i === question.correct) {
+                    option.classList.add('correct');
+                } else if (i === index && i !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            if (index === question.correct) {
+                score++;
+                document.getElementById('score').textContent = score;
+            }
+            
+            document.getElementById('next-btn').disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion < shuffledQuestions.length) {
+                loadQuestion();
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function showFinalScore() {
+            document.getElementById('game-area').style.display = 'none';
+            document.getElementById('final-screen').style.display = 'block';
+            
+            const percentage = (score / shuffledQuestions.length) * 100;
+            document.getElementById('final-score').textContent = `${score}/${shuffledQuestions.length} (${percentage.toFixed(1)}%)`;
+            
+            let message = '';
+            if (percentage >= 90) {
+                message = '🏆 Excelente! Você domina gestão e liderança!';
+            } else if (percentage >= 70) {
+                message = '👏 Muito bom! Bom conhecimento em gestão!';
+            } else if (percentage >= 50) {
+                message = '📚 Continue estudando gestão de pessoas!';
+            } else {
+                message = '💪 Revise os conceitos de liderança!';
+            }
+            
+            // Atualizar progresso do nível
+            const progresso = JSON.parse(localStorage.getItem('progresso_niveis') || '{}');
+            progresso.intermediario = Math.max(progresso.intermediario || 0, percentage);
+            localStorage.setItem('progresso_niveis', JSON.stringify(progresso));
+            
+            // Verificar se atingiu o mínimo para avançar
+            if (percentage < 80) {
+                message += `\n\n⚠️ Para passar para o próximo nível, você deve atingir o mínimo de 8 (80%), tente novamente. Você consegue!`;
+            } else {
+                message += `\n\n✅ Parabéns! Você desbloqueou o nível Avançado!`;
+            }
+            
+            document.getElementById('final-message').textContent = message;
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            selectedAnswer = null;
+            
+            document.getElementById('score').textContent = '0';
+            document.getElementById('game-area').style.display = 'block';
+            document.getElementById('final-screen').style.display = 'none';
+            
+            loadQuestion();
+        }
+
+        function goHome() {
+            window.location.href = 'index.html#levels';
+        }
+        
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        shuffledQuestions = shuffleArray(questions);
+        loadQuestion();
+    </script>
+</body>
+</html>
