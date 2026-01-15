@@ -254,18 +254,16 @@
             
             const categories = [...new Set(level.concepts.map(c => c.category))];
             const categoryTitles = {
-                'sociais': '🤝 HABILIDADES SOCIAIS',
-                'emocionais': '😊 HABILIDADES EMOCIONAIS',
-                'tecnicas': '🛠️ HABILIDADES TÉCNICAS',
-                'estrategicas': '🎯 HABILIDADES ESTRATÉGICAS',
                 'planejar': '📋 PLANEJAR',
                 'organizar': '🏗️ ORGANIZAR', 
                 'dirigir': '👥 DIRIGIR',
                 'controlar': '📊 CONTROLAR',
-                'administrativo': '📁 ADMINISTRATIVO',
-                'comercial': '💼 COMERCIAL',
-                'financeiro': '💰 FINANCEIRO',
-                'rh': '👥 RECURSOS HUMANOS'
+                'autocratica': '👑 AUTOCRÁTICA',
+                'democratica': '🤝 DEMOCRÁTICA',
+                'liberal': '🆓 LIBERAL',
+                'institucional': '🏢 INSTITUCIONAL',
+                'intermediario': '⚖️ INTERMEDIÁRIO',
+                'operacional': '⚙️ OPERACIONAL'
             };
             
             categories.forEach(category => {
@@ -447,6 +445,23 @@
             } else {
                 window.location.href = 'index.html#basico';
             }
+        }
+
+        function criarBarraProgresso(elementId, progresso, titulo) {
+            const elemento = document.getElementById(elementId);
+            if (!elemento) return;
+            
+            elemento.innerHTML = `
+                <div style="margin: 10px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span style="font-weight: bold;">${titulo}</span>
+                        <span style="font-weight: bold;">${progresso}%</span>
+                    </div>
+                    <div style="background: #e0e0e0; height: 20px; border-radius: 10px; overflow: hidden;">
+                        <div style="background: linear-gradient(90deg, #4CAF50, #45a049); height: 100%; width: ${progresso}%; transition: width 0.5s ease;"></div>
+                    </div>
+                </div>
+            `;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
