@@ -177,9 +177,12 @@
             <p id="final-message"></p>
         </div>
         
-        <button class="restart-btn" onclick="restartGame()">Reiniciar Jogo</button>
-        <button class="next-btn" onclick="proximoJogo()">Próximo Jogo</button>
-        <button class="home-btn" onclick="goHome()">Voltar ao Menu</button>
+        <div class="buttons">
+            <button class="btn" id="verify-btn" onclick="verifyLevel()">Verificar Nível</button>
+            <button class="restart-btn" onclick="restartGame()">Reiniciar Jogo</button>
+            <button class="btn" id="next-game-btn" onclick="proximoJogo()" style="display: none;">Próximo Jogo</button>
+            <button class="home-btn" onclick="goHome()">Voltar ao Menu</button>
+        </div>
     </div>
 
     <script src="sistema-pontuacao.js"></script>
@@ -331,20 +334,26 @@
                             }
                         });
                         
-                        levelScore++;
-                        score++;
-                        document.getElementById('score').textContent = levelScore;
-                        
                         playAudio('Correto!');
-                        
-                        if (levelScore === levels[currentLevel].concepts.length) {
-                            completeLevel();
-                        }
                     } else {
                         playAudio('Tente novamente!');
                     }
                 });
             });
+        }
+
+        function verifyLevel() {
+            const droppedItems = document.querySelectorAll('.dropped-item');
+            const totalItems = levels[currentLevel].concepts.length;
+            
+            if (droppedItems.length === totalItems) {
+                levelScore = totalItems;
+                score += totalItems;
+                document.getElementById('score').textContent = levelScore;
+                completeLevel();
+            } else {
+                playAudio(`Você organizou ${droppedItems.length} de ${totalItems} itens. Continue arrastando!`);
+            }
         }
 
         function completeLevel() {
@@ -376,6 +385,7 @@
                 `;
                 
                 document.getElementById('game-complete').style.display = 'block';
+                document.getElementById('next-game-btn').style.display = 'inline-block';
                 criarBarraProgresso('progresso-arrastar', resultado.progresso, 'Progresso Geral');
                 
                 playAudio(message);
