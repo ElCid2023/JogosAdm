@@ -412,7 +412,6 @@
         
         function registrarAcesso(nome, semestre, turma, periodo, email) {
             const agora = new Date();
-            const stats = sistemaPontuacao.obterEstatisticas();
             
             const dados = {
                 nome: nome,
@@ -422,9 +421,9 @@
                 email: email || 'Não informado',
                 data: agora.toLocaleDateString('pt-BR'),
                 hora: agora.toLocaleTimeString('pt-BR'),
-                pontuacao: stats.pontuacaoTotal,
-                progresso: stats.progresso + '%',
-                jogosCompletados: stats.jogosCompletados,
+                pontuacao: '-',
+                progresso: '-',
+                jogosCompletados: '-',
                 timestamp: agora.getTime()
             };
             

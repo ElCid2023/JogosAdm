@@ -359,6 +359,9 @@
             const percentage = (score / shuffledQuestions.length) * 100;
             document.getElementById('final-score').textContent = `${score}/${shuffledQuestions.length} (${percentage.toFixed(1)}%)`;
             
+            // Atualizar Google Sheets
+            atualizarDesempenhoGoogleSheets();
+            
             let message = '';
             if (percentage >= 90) {
                 message = '🏆 Excelente! Você domina gestão e liderança!';
@@ -398,7 +401,40 @@
         }
 
         function goHome() {
-            window.location.href = 'index.html#levels';
+            window.history.back();
+        }
+        
+        function atualizarDesempenhoGoogleSheets() {
+            const dadosAluno = JSON.parse(localStorage.getItem('dados_aluno_atual') || '{}');
+            if (!dadosAluno.nome) return;
+            
+            const stats = sistemaPontuacao.obterEstatisticas();
+            const agora = new Date();
+            
+            const dados = {
+                nome: dadosAluno.nome,
+                semestre: dadosAluno.semestre,
+                turma: dadosAluno.turma,
+                periodo: dadosAluno.periodo,
+                email: dadosAluno.email,
+                data: agora.toLocaleDateString('pt-BR'),
+                hora: agora.toLocaleTimeString('pt-BR'),
+                pontuacao: stats.pontuacaoTotal,
+                progresso: stats.progresso + '%',
+                jogosCompletados: stats.jogosCompletados
+            };
+            
+            const GOOGLE_SCRIPT_URL = localStorage.getItem('google_script_url');
+            if (!GOOGLE_SCRIPT_URL) return;
+            
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            }).catch(error => {
+                console.log('Erro ao atualizar Google Sheets');
+            });
         }
         
         function shuffleArray(array) {
