@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arrastar e Soltar - Administração</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        h1 {
+            color: #4a5568;
+            margin-bottom: 20px;
+        }
+        
+        .instruction {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .concepts-area {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            min-height: 400px;
+        }
+        
+        .categories-area {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            min-height: 400px;
+        }
+        
+        .concept-item {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        
+        .concept-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .concept-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+        
+        .category-box {
+            background: #e8f5e8;
+            border: 2px dashed #4CAF50;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .category-box.drag-over {
+            background: #c8e6c9;
+            border-color: #2e7d32;
+        }
+        
+        .category-title {
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+        
+        .dropped-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+        }
+        
+        .dropped-item {
+            background: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .score {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .home-btn, .restart-btn, .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        .restart-btn {
+            background: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Arrastar e Soltar - Funções Administrativas</h1>
+        
+        <div class="instruction" id="instruction">
+            Arraste os conceitos para suas respectivas categorias
+        </div>
+        
+        <div class="score">
+            Nível: <span id="current-level">1</span>/3 | Pontos: <span id="score">0</span>/<span id="level-total">0</span>
+        </div>
+        
+        <div class="game-area">
+            <div class="concepts-area">
+                <h3>Conceitos</h3>
+                <div id="concepts-list"></div>
+            </div>
+            
+            <div class="categories-area">
+                <h3 id="categories-title">Categorias</h3>
+                <div id="categories-container"></div>
+            </div>
+        </div>
+        
+        <div id="level-complete" style="display: none;">
+            <h2>🎉 Nível Completo!</h2>
+            <p id="level-message"></p>
+            <button class="restart-btn" onclick="nextLevel()" id="next-btn">Próximo Nível</button>
+        </div>
+        
+        <div id="game-complete" style="display: none;">
+            <h2>🏆 Parabéns! Você completou todos os níveis!</h2>
+            <p id="final-message"></p>
+        </div>
+        
+        <div class="buttons">
+            <button class="home-btn" id="verify-btn" onclick="verifyLevel()">Verificar Nível</button>
+            <button class="restart-btn" onclick="restartGame()">Reiniciar Jogo</button>
+            <button class="home-btn" id="next-game-btn" onclick="proximoJogo()" style="display: none;">Próximo Jogo</button>
+            <button class="home-btn" onclick="goHome()">Voltar ao Menu</button>
+        </div>
+    </div>
+
+    <script src="sistema-pontuacao.js"></script>
+    <script>
+        let score = 0;
+        let currentLevel = 0;
+        let levelScore = 0;
+        
+        const levels = [
+            {
+                title: "Funções Administrativas",
+                concepts: [
+                    { text: "Definir objetivos", category: "planejar" },
+                    { text: "Estruturar recursos", category: "organizar" },
+                    { text: "Liderar equipes", category: "dirigir" },
+                    { text: "Verificar resultados", category: "controlar" },
+                    { text: "Estabelecer metas", category: "planejar" },
+                    { text: "Dividir tarefas", category: "organizar" },
+                    { text: "Motivar funcionários", category: "dirigir" },
+                    { text: "Corrigir desvios", category: "controlar" }
+                ]
+            },
+            {
+                title: "Tipos de Liderança",
+                concepts: [
+                    { text: "Toma decisões sozinho", category: "autocratica" },
+                    { text: "Envolve a equipe", category: "democratica" },
+                    { text: "Deixa a equipe livre", category: "liberal" },
+                    { text: "Controle rígido", category: "autocratica" },
+                    { text: "Participação ativa", category: "democratica" },
+                    { text: "Mínima interferência", category: "liberal" }
+                ]
+            },
+            {
+                title: "Níveis Organizacionais",
+                concepts: [
+                    { text: "Planejamento estratégico", category: "institucional" },
+                    { text: "Coordenação de equipes", category: "intermediario" },
+                    { text: "Execução de tarefas", category: "operacional" },
+                    { text: "Definir missão", category: "institucional" },
+                    { text: "Supervisionar atividades", category: "intermediario" },
+                    { text: "Produzir resultados", category: "operacional" }
+                ]
+            }
+        ];
+
+        function loadLevel() {
+            const level = levels[currentLevel];
+            levelScore = 0;
+            
+            document.getElementById('instruction').textContent = `Nível ${currentLevel + 1}: ${level.title}`;
+            document.getElementById('current-level').textContent = currentLevel + 1;
+            document.getElementById('score').textContent = levelScore;
+            document.getElementById('level-total').textContent = level.concepts.length;
+            
+            // Criar conceitos
+            const conceptsList = document.getElementById('concepts-list');
+            conceptsList.innerHTML = '';
+            
+            level.concepts.forEach(concept => {
+                const div = document.createElement('div');
+                div.className = 'concept-item';
+                div.draggable = true;
+                div.textContent = concept.text;
+                div.dataset.category = concept.category;
+                conceptsList.appendChild(div);
+            });
+            
+            // Criar categorias
+            const categoriesContainer = document.getElementById('categories-container');
+            categoriesContainer.innerHTML = '';
+            
+            const categories = [...new Set(level.concepts.map(c => c.category))];
+            const categoryTitles = {
+                'planejar': '📋 PLANEJAR',
+                'organizar': '🏗️ ORGANIZAR', 
+                'dirigir': '👥 DIRIGIR',
+                'controlar': '📊 CONTROLAR',
+                'autocratica': '👑 AUTOCRÁTICA',
+                'democratica': '🤝 DEMOCRÁTICA',
+                'liberal': '🆓 LIBERAL',
+                'institucional': '🏢 INSTITUCIONAL',
+                'intermediario': '⚖️ INTERMEDIÁRIO',
+                'operacional': '⚙️ OPERACIONAL'
+            };
+            
+            categories.forEach(category => {
+                const div = document.createElement('div');
+                div.className = 'category-box';
+                div.dataset.category = category;
+                div.innerHTML = `
+                    <div class="category-title">${categoryTitles[category] || category.toUpperCase()}</div>
+                    <div class="dropped-items" id="${category}-items"></div>
+                `;
+                categoriesContainer.appendChild(div);
+            });
+            
+            setupDragAndDrop();
+            document.getElementById('level-complete').style.display = 'none';
+            document.getElementById('game-complete').style.display = 'none';
+        }
+        
+        function setupDragAndDrop() {
+            const concepts = document.querySelectorAll('.concept-item');
+            const categories = document.querySelectorAll('.category-box');
+
+            concepts.forEach(concept => {
+                concept.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', e.target.textContent);
+                    e.dataTransfer.setData('category', e.target.dataset.category);
+                    e.target.classList.add('dragging');
+                });
+
+                concept.addEventListener('dragend', (e) => {
+                    e.target.classList.remove('dragging');
+                });
+            });
+
+            categories.forEach(category => {
+                category.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    category.classList.add('drag-over');
+                });
+
+                category.addEventListener('dragleave', () => {
+                    category.classList.remove('drag-over');
+                });
+
+                category.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    category.classList.remove('drag-over');
+                    
+                    const conceptText = e.dataTransfer.getData('text/plain');
+                    const conceptCategory = e.dataTransfer.getData('category');
+                    const targetCategory = category.dataset.category;
+                    
+                    if (conceptCategory === targetCategory) {
+                        const droppedItem = document.createElement('div');
+                        droppedItem.className = 'dropped-item';
+                        droppedItem.textContent = conceptText;
+                        
+                        const itemsContainer = category.querySelector('.dropped-items');
+                        itemsContainer.appendChild(droppedItem);
+                        
+                        const conceptItems = document.querySelectorAll('.concept-item');
+                        conceptItems.forEach(item => {
+                            if (item.textContent === conceptText) {
+                                item.remove();
+                            }
+                        });
+                        
+                        playAudio('Correto!');
+                    } else {
+                        playAudio('Tente novamente!');
+                    }
+                });
+            });
+        }
+
+        function verifyLevel() {
+            console.log('Verificar nível clicado');
+            const droppedItems = document.querySelectorAll('.dropped-item');
+            const totalItems = levels[currentLevel].concepts.length;
+            
+            console.log(`Itens arrastados: ${droppedItems.length}, Total: ${totalItems}`);
+            
+            if (droppedItems.length === totalItems) {
+                levelScore = totalItems;
+                score += totalItems;
+                document.getElementById('score').textContent = levelScore;
+                completeLevel();
+            } else {
+                alert(`Você organizou ${droppedItems.length} de ${totalItems} itens. Continue arrastando!`);
+                playAudio(`Você organizou ${droppedItems.length} de ${totalItems} itens. Continue arrastando!`);
+            }
+        }
+
+        function completeLevel() {
+            document.getElementById('level-complete').style.display = 'block';
+            
+            if (currentLevel < levels.length - 1) {
+                document.getElementById('level-message').textContent = `Nível ${currentLevel + 1} completo! Pronto para o próximo?`;
+                document.getElementById('next-btn').style.display = 'inline-block';
+                playAudio(`Nível ${currentLevel + 1} completo! Clique em próximo nível!`);
+            } else {
+                document.getElementById('level-complete').style.display = 'none';
+                
+                const pontos = score * 10;
+                const resultado = sistemaPontuacao.adicionarPontos('arrastar', pontos, 300);
+                
+                atualizarDesempenhoGoogleSheets();
+                
+                let message = `Todos os níveis completos! Pontos: ${pontos}`;
+                if (resultado.melhorPontuacao) {
+                    message += ` ✨ Nova melhor pontuação!`;
+                }
+                message += ` Total: ${resultado.pontuacaoTotal} pontos`;
+                
+                document.getElementById('final-message').innerHTML = `
+                    ${message}
+                    <div style="margin: 10px 0;">
+                        <div id="progresso-arrastar"></div>
+                    </div>
+                `;
+                
+                document.getElementById('game-complete').style.display = 'block';
+                document.getElementById('next-game-btn').style.display = 'inline-block';
+                criarBarraProgresso('progresso-arrastar', resultado.progresso, 'Progresso Geral');
+                
+                playAudio(message);
+            }
+        }
+        
+        function nextLevel() {
+            currentLevel++;
+            loadLevel();
+            playAudio(`Nível ${currentLevel + 1}: ${levels[currentLevel].title}`);
+        }
+        
+        function restartGame() {
+            currentLevel = 0;
+            score = 0;
+            loadLevel();
+            playAudio('Jogo reiniciado! Vamos começar do primeiro nível!');
+        }
+
+        function playAudio(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'pt-BR';
+                utterance.rate = 0.9;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function goHome() {
+            window.history.back();
+        }
+        
+        function atualizarDesempenhoGoogleSheets() {
+            const dadosAluno = JSON.parse(localStorage.getItem('dados_aluno_atual') || '{}');
+            if (!dadosAluno.nome) return;
+            const stats = sistemaPontuacao.obterEstatisticas();
+            const agora = new Date();
+            const dados = {
+                nome: dadosAluno.nome,
+                semestre: dadosAluno.semestre,
+                turma: dadosAluno.turma,
+                periodo: dadosAluno.periodo,
+                email: dadosAluno.email,
+                data: agora.toLocaleDateString('pt-BR'),
+                hora: agora.toLocaleTimeString('pt-BR'),
+                pontuacao: stats.pontuacaoTotal,
+                progresso: stats.progresso + '%',
+                jogosCompletados: stats.jogosCompletados
+            };
+            const GOOGLE_SCRIPT_URL = localStorage.getItem('google_script_url');
+            if (!GOOGLE_SCRIPT_URL) return;
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            }).catch(error => console.log('Erro'));
+        }
+        
+        function proximoJogo() {
+            const jogosBasicos = ['quiz-basico.html', 'jogo-memoria.html', 'jogo-arrastar.html', 'jogo-lacunas-basico.html', 'jogo-forca.html'];
+            const jogoAtual = window.location.pathname.split('/').pop();
+            const indiceAtual = jogosBasicos.indexOf(jogoAtual);
+            
+            if (indiceAtual < jogosBasicos.length - 1) {
+                window.location.href = jogosBasicos[indiceAtual + 1];
+            } else {
+                window.location.href = 'index.html#basico';
+            }
+        }
+
+        function criarBarraProgresso(elementId, progresso, titulo) {
+            const elemento = document.getElementById(elementId);
+            if (!elemento) return;
+            
+            elemento.innerHTML = `
+                <div style="margin: 10px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span style="font-weight: bold;">${titulo}</span>
+                        <span style="font-weight: bold;">${progresso}%</span>
+                    </div>
+                    <div style="background: #e0e0e0; height: 20px; border-radius: 10px; overflow: hidden;">
+                        <div style="background: linear-gradient(90deg, #4CAF50, #45a049); height: 100%; width: ${progresso}%; transition: width 0.5s ease;"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLevel();
+            playAudio('Bem-vindo ao jogo de arrastar e soltar! Organize os conceitos nas categorias corretas!');
+        });
+    </script>
+</body>
+</html>
