@@ -170,6 +170,25 @@
         </div>
     </div>
 
+    <script src="sistema-pontuacao.js"></script>
+    <script>
+        function criarBarraProgresso(elementId, progresso, titulo) {
+            const elemento = document.getElementById(elementId);
+            if (!elemento) return;
+            
+            elemento.innerHTML = `
+                <div style="margin: 10px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span style="font-weight: bold;">${titulo}</span>
+                        <span style="font-weight: bold;">${progresso}%</span>
+                    </div>
+                    <div style="background: #e0e0e0; height: 20px; border-radius: 10px; overflow: hidden;">
+                        <div style="background: linear-gradient(90deg, #4CAF50, #45a049); height: 100%; width: ${progresso}%; transition: width 0.5s ease;"></div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
     <script>
         const words = [
             { word: 'PORTER', hint: '5 Forças de...' },
@@ -327,7 +346,22 @@
                     if (foundWords.length === words.length) {
                         setTimeout(() => {
                             clearInterval(timerInterval);
-                            alert(`🏆 Parabéns! Você encontrou todas as palavras em ${document.getElementById('timer').textContent}!`);
+                            const tempo = document.getElementById('timer').textContent;
+                            const pontos = Math.max(50, 100 - foundWords.length * 2);
+                            const resultado = sistemaPontuacao.adicionarPontos('caca-palavras-avancado', pontos, 100);
+                            
+                            const progresso = JSON.parse(localStorage.getItem('progresso_niveis') || '{}');
+                            const percentual = (pontos / 100) * 100;
+                            progresso.avancado = Math.max(progresso.avancado || 0, percentual);
+                            localStorage.setItem('progresso_niveis', JSON.stringify(progresso));
+                            
+                            let message = `🏆 Parabéns! Você encontrou todas as palavras em ${tempo}! Pontos: ${pontos}`;
+                            if (resultado.melhorPontuacao) {
+                                message += ` ✨ Nova melhor pontuação!`;
+                            }
+                            message += ` Total: ${resultado.pontuacaoTotal} pontos (${resultado.progresso}% completo)`;
+                            
+                            alert(message);
                         }, 300);
                     }
                 }
@@ -355,7 +389,7 @@
         }
 
         function goHome() {
-            window.location.href = 'index.html';
+            window.location.href = 'index.html#avancado';
         }
 
         document.addEventListener('DOMContentLoaded', () => {

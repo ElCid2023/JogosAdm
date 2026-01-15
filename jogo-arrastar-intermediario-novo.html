@@ -325,6 +325,8 @@
                 const pontos = Math.round(percentage);
                 const resultado = sistemaPontuacao.adicionarPontos('arrastar-intermediario', pontos, 100);
                 
+                atualizarDesempenhoGoogleSheets();
+                
                 const progresso = JSON.parse(localStorage.getItem('progresso_niveis') || '{}');
                 progresso.intermediario = Math.max(progresso.intermediario || 0, percentage);
                 localStorage.setItem('progresso_niveis', JSON.stringify(progresso));
@@ -377,7 +379,34 @@
         }
 
         function goHome() {
-            window.location.href = 'index.html#intermediario';
+            window.history.back();
+        }
+        
+        function atualizarDesempenhoGoogleSheets() {
+            const dadosAluno = JSON.parse(localStorage.getItem('dados_aluno_atual') || '{}');
+            if (!dadosAluno.nome) return;
+            const stats = sistemaPontuacao.obterEstatisticas();
+            const agora = new Date();
+            const dados = {
+                nome: dadosAluno.nome,
+                semestre: dadosAluno.semestre,
+                turma: dadosAluno.turma,
+                periodo: dadosAluno.periodo,
+                email: dadosAluno.email,
+                data: agora.toLocaleDateString('pt-BR'),
+                hora: agora.toLocaleTimeString('pt-BR'),
+                pontuacao: stats.pontuacaoTotal,
+                progresso: stats.progresso + '%',
+                jogosCompletados: stats.jogosCompletados
+            };
+            const GOOGLE_SCRIPT_URL = localStorage.getItem('google_script_url');
+            if (!GOOGLE_SCRIPT_URL) return;
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            }).catch(error => console.log('Erro'));
         }
         
         function proximoJogo() {

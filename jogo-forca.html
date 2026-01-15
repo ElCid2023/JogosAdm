@@ -287,6 +287,8 @@
                         const pontosJogo = Math.round((points / 60) * 100);
                         const resultado = sistemaPontuacao.adicionarPontos('forca', pontosJogo, 100);
                         
+                        atualizarDesempenhoGoogleSheets();
+                        
                         document.getElementById('next-btn').disabled = false;
                         
                         let message = `Parabéns! Você completou todas as 6 palavras! Pontos: ${pontosJogo}`;
@@ -341,7 +343,34 @@
         }
 
         function goHome() {
-            window.location.href = 'index.html#basico';
+            window.history.back();
+        }
+        
+        function atualizarDesempenhoGoogleSheets() {
+            const dadosAluno = JSON.parse(localStorage.getItem('dados_aluno_atual') || '{}');
+            if (!dadosAluno.nome) return;
+            const stats = sistemaPontuacao.obterEstatisticas();
+            const agora = new Date();
+            const dados = {
+                nome: dadosAluno.nome,
+                semestre: dadosAluno.semestre,
+                turma: dadosAluno.turma,
+                periodo: dadosAluno.periodo,
+                email: dadosAluno.email,
+                data: agora.toLocaleDateString('pt-BR'),
+                hora: agora.toLocaleTimeString('pt-BR'),
+                pontuacao: stats.pontuacaoTotal,
+                progresso: stats.progresso + '%',
+                jogosCompletados: stats.jogosCompletados
+            };
+            const GOOGLE_SCRIPT_URL = localStorage.getItem('google_script_url');
+            if (!GOOGLE_SCRIPT_URL) return;
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            }).catch(error => console.log('Erro'));
         }
         
         function proximoJogo() {
