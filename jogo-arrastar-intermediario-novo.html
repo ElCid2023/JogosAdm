@@ -239,6 +239,54 @@
         let totalItems = 13;
         let gameCompleted = false;
 
+        function adicionarTouchSupport(elements, dropZones, correctAttr, zoneAttr, onCorrect, onIncorrect) {
+            elements.forEach(el => {
+                el.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    el._touchOffsetX = touch.clientX - el.getBoundingClientRect().left;
+                    el._touchOffsetY = touch.clientY - el.getBoundingClientRect().top;
+                    el.classList.add('dragging');
+                    el.style.position = 'fixed';
+                    el.style.zIndex = '1000';
+                    el.style.width = el.offsetWidth + 'px';
+                    el.style.left = (touch.clientX - el._touchOffsetX) + 'px';
+                    el.style.top = (touch.clientY - el._touchOffsetY) + 'px';
+                }, { passive: false });
+                el.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    el.style.left = (touch.clientX - el._touchOffsetX) + 'px';
+                    el.style.top = (touch.clientY - el._touchOffsetY) + 'px';
+                    dropZones.forEach(z => z.classList.remove('drag-over'));
+                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                    const zone = target ? target.closest('[data-' + zoneAttr + ']') : null;
+                    if (zone) zone.classList.add('drag-over');
+                }, { passive: false });
+                el.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    const touch = e.changedTouches[0];
+                    el.classList.remove('dragging');
+                    el.style.position = '';
+                    el.style.zIndex = '';
+                    el.style.width = '';
+                    el.style.left = '';
+                    el.style.top = '';
+                    dropZones.forEach(z => z.classList.remove('drag-over'));
+                    if (el.classList.contains('correct')) return;
+                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                    const zone = target ? target.closest('[data-' + zoneAttr + ']') : null;
+                    if (zone) {
+                        if (el.dataset[correctAttr] === zone.dataset[zoneAttr]) {
+                            onCorrect(el, zone);
+                        } else {
+                            onIncorrect(el);
+                        }
+                    }
+                }, { passive: false });
+            });
+        }
+
         function initGame() {
             const activities = document.querySelectorAll('.activity');
             const dropZones = document.querySelectorAll('.drop-zone');
@@ -259,6 +307,26 @@
                 zone.addEventListener('dragenter', handleDragEnter);
                 zone.addEventListener('dragleave', handleDragLeave);
             });
+
+            adicionarTouchSupport(
+                Array.from(activities),
+                Array.from(dropZones),
+                'correct', 'objective',
+                (el, zone) => {
+                    el.classList.add('correct');
+                    el.draggable = false;
+                    zone.appendChild(el);
+                    score++;
+                    playAudio('Correto!');
+                    updateScore();
+                    checkGameComplete();
+                },
+                (el) => {
+                    el.classList.add('incorrect');
+                    setTimeout(() => el.classList.remove('incorrect'), 500);
+                    playAudio('Tente novamente!');
+                }
+            );
         }
 
         function handleDragStart(e) {
@@ -379,7 +447,7 @@
         }
 
         function goHome() {
-            window.history.back();
+            window.location.href = 'index.html?nivel=intermediario';
         }
         
         function atualizarDesempenhoGoogleSheets() {

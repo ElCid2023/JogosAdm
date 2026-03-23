@@ -295,10 +295,63 @@
                     e.dataTransfer.setData('category', e.target.dataset.category);
                     e.target.classList.add('dragging');
                 });
-
                 concept.addEventListener('dragend', (e) => {
                     e.target.classList.remove('dragging');
                 });
+
+                // Suporte a touch (celular)
+                concept.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    concept._touchOffsetX = touch.clientX - concept.getBoundingClientRect().left;
+                    concept._touchOffsetY = touch.clientY - concept.getBoundingClientRect().top;
+                    concept.classList.add('dragging');
+                    concept.style.position = 'fixed';
+                    concept.style.zIndex = '1000';
+                    concept.style.width = concept.offsetWidth + 'px';
+                    concept.style.left = (touch.clientX - concept._touchOffsetX) + 'px';
+                    concept.style.top = (touch.clientY - concept._touchOffsetY) + 'px';
+                }, { passive: false });
+
+                concept.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    concept.style.left = (touch.clientX - concept._touchOffsetX) + 'px';
+                    concept.style.top = (touch.clientY - concept._touchOffsetY) + 'px';
+                    document.querySelectorAll('.category-box').forEach(c => c.classList.remove('drag-over'));
+                    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+                    const box = el ? el.closest('.category-box') : null;
+                    if (box) box.classList.add('drag-over');
+                }, { passive: false });
+
+                concept.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    const touch = e.changedTouches[0];
+                    concept.classList.remove('dragging');
+                    concept.style.position = '';
+                    concept.style.zIndex = '';
+                    concept.style.width = '';
+                    concept.style.left = '';
+                    concept.style.top = '';
+                    document.querySelectorAll('.category-box').forEach(c => c.classList.remove('drag-over'));
+                    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+                    const box = el ? el.closest('.category-box') : null;
+                    if (box) {
+                        const targetCategory = box.dataset.category;
+                        const conceptCategory = concept.dataset.category;
+                        const conceptText = concept.textContent;
+                        if (conceptCategory === targetCategory) {
+                            const droppedItem = document.createElement('div');
+                            droppedItem.className = 'dropped-item';
+                            droppedItem.textContent = conceptText;
+                            box.querySelector('.dropped-items').appendChild(droppedItem);
+                            concept.remove();
+                            playAudio('Correto!');
+                        } else {
+                            playAudio('Tente novamente!');
+                        }
+                    }
+                }, { passive: false });
             });
 
             categories.forEach(category => {
@@ -306,34 +359,24 @@
                     e.preventDefault();
                     category.classList.add('drag-over');
                 });
-
                 category.addEventListener('dragleave', () => {
                     category.classList.remove('drag-over');
                 });
-
                 category.addEventListener('drop', (e) => {
                     e.preventDefault();
                     category.classList.remove('drag-over');
-                    
                     const conceptText = e.dataTransfer.getData('text/plain');
                     const conceptCategory = e.dataTransfer.getData('category');
                     const targetCategory = category.dataset.category;
-                    
                     if (conceptCategory === targetCategory) {
                         const droppedItem = document.createElement('div');
                         droppedItem.className = 'dropped-item';
                         droppedItem.textContent = conceptText;
-                        
                         const itemsContainer = category.querySelector('.dropped-items');
                         itemsContainer.appendChild(droppedItem);
-                        
-                        const conceptItems = document.querySelectorAll('.concept-item');
-                        conceptItems.forEach(item => {
-                            if (item.textContent === conceptText) {
-                                item.remove();
-                            }
+                        document.querySelectorAll('.concept-item').forEach(item => {
+                            if (item.textContent === conceptText) item.remove();
                         });
-                        
                         playAudio('Correto!');
                     } else {
                         playAudio('Tente novamente!');
@@ -415,7 +458,7 @@
         }
 
         function goHome() {
-            window.history.back();
+            window.location.href = 'index.html?nivel=basico';
         }
         
         function atualizarDesempenhoGoogleSheets() {

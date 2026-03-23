@@ -39,7 +39,7 @@ class SistemaPontuacao {
     }
 
     calcularProgresso() {
-        const totalJogos = 12; // quiz-basico, quiz-intermediario, quiz-avancado, memoria, memoria-intermediario, memoria-avancado, arrastar, arrastar-intermediario, arrastar-avancado, lacunas, completar-intermediario, caca-palavras-avancado, forca
+        const totalJogos = 15; // quiz-basico, quiz-intermediario, quiz-avancado, memoria, memoria-intermediario, memoria-avancado, arrastar, arrastar-intermediario, arrastar-avancado, lacunas, lacunas-basico, completar-intermediario, completar-frases, caca-palavras-avancado, forca
         const jogosCompletos = Object.keys(this.jogosCompletados).length;
         return Math.round((jogosCompletos / totalJogos) * 100);
     }

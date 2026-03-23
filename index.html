@@ -399,9 +399,6 @@
             
             playerName = name;
             
-            // Limpar pontuação anterior (novo aluno)
-            sistemaPontuacao.resetar();
-            
             // Registrar acesso no Google Sheets e LocalStorage
             registrarAcesso(name, semestre, turma, periodo, email);
             
@@ -554,6 +551,28 @@
             document.getElementById('games-avancado').classList.add('hidden');
             document.getElementById('stats-panel').classList.add('hidden');
             document.getElementById('level-selection').classList.add('hidden');
+            
+            // Verificar se voltou de um jogo via parâmetro de URL
+            const params = new URLSearchParams(window.location.search);
+            const nivel = params.get('nivel');
+            const dadosAluno = JSON.parse(localStorage.getItem('dados_aluno_atual') || '{}');
+            
+            if (nivel && dadosAluno.nome) {
+                playerName = dadosAluno.nome;
+                document.getElementById('name-input').classList.add('hidden');
+                document.getElementById('level-selection').classList.add('hidden');
+                document.getElementById('player-name').textContent = playerName;
+                const gamesDiv = document.getElementById('games-' + nivel);
+                if (gamesDiv) {
+                    gamesDiv.classList.remove('hidden');
+                    atualizarEstatisticas();
+                } else {
+                    document.getElementById('level-selection').classList.remove('hidden');
+                }
+                // Limpar parâmetro da URL sem recarregar
+                window.history.replaceState({}, '', 'index.html');
+                return;
+            }
             
             // Sempre mostrar tela de nome
             document.getElementById('name-input').classList.remove('hidden');
