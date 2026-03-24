@@ -409,21 +409,7 @@
         
         function registrarAcesso(nome, semestre, turma, periodo, email) {
             const agora = new Date();
-            
-            const dados = {
-                nome: nome,
-                semestre: semestre,
-                turma: turma,
-                periodo: periodo,
-                email: email || 'Não informado',
-                data: agora.toLocaleDateString('pt-BR'),
-                hora: agora.toLocaleTimeString('pt-BR'),
-                pontuacao: '-',
-                progresso: '-',
-                jogosCompletados: '-',
-                timestamp: agora.getTime()
-            };
-            
+
             // Salvar dados do aluno atual para uso nos jogos
             localStorage.setItem('dados_aluno_atual', JSON.stringify({
                 nome: nome,
@@ -432,24 +418,35 @@
                 periodo: periodo,
                 email: email || 'Não informado'
             }));
-            
+
             // Salvar URL do Google Sheets
             localStorage.setItem('google_script_url', GOOGLE_SCRIPT_URL);
-            
+
+            // Enviar apenas o registro de acesso (sem pontuacao) para o Google Sheets
+            // Usa tipo 'acesso' para o Apps Script poder diferenciar e nao sobrescrever pontuacao
+            const dados = {
+                tipo: 'acesso',
+                nome: nome,
+                semestre: semestre,
+                turma: turma,
+                periodo: periodo,
+                email: email || 'Não informado',
+                data: agora.toLocaleDateString('pt-BR'),
+                hora: agora.toLocaleTimeString('pt-BR'),
+                timestamp: agora.getTime()
+            };
+
             // Salvar no LocalStorage (backup local)
             const acessos = JSON.parse(localStorage.getItem('relatorio_acessos') || '[]');
             acessos.push(dados);
             localStorage.setItem('relatorio_acessos', JSON.stringify(acessos));
-            
-            // Enviar para Google Sheets
+
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(dados)
-            }).catch(error => {
+            }).catch(() => {
                 console.log('Dados salvos localmente. Conexão com Google Sheets pode estar offline.');
             });
         }

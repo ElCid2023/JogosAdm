@@ -204,17 +204,34 @@
         let points = 0;
         let usedLetters = [];
         let wordsCompleted = 0;
+        let shuffledWords = [];
+        let wordIndex = 0;
+
+        function shuffleWords() {
+            shuffledWords = [...words];
+            for (let i = shuffledWords.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledWords[i], shuffledWords[j]] = [shuffledWords[j], shuffledWords[i]];
+            }
+            wordIndex = 0;
+        }
 
         function newGame(resetAll = true) {
             if (resetAll) {
                 wordsCompleted = 0;
                 points = 0;
+                shuffleWords();
                 document.getElementById('next-btn').disabled = true;
             }
-            
-            const randomIndex = Math.floor(Math.random() * words.length);
-            currentWord = words[randomIndex].word;
-            currentHint = words[randomIndex].hint;
+
+            // Garante que nunca ultrapassa o array e nunca repete
+            if (wordIndex >= shuffledWords.length) {
+                shuffleWords(); // re-embaralha se acabar as palavras
+            }
+            const wordObj = shuffledWords[wordIndex];
+            wordIndex++;
+            currentWord = wordObj.word;
+            currentHint = wordObj.hint;
             
             guessedWord = Array(currentWord.length).fill('_');
             wrongGuesses = 0;
@@ -343,7 +360,7 @@
         }
 
         function goHome() {
-            window.history.back();
+            window.location.href = 'index.html?nivel=basico';
         }
         
         function atualizarDesempenhoGoogleSheets() {
@@ -390,7 +407,7 @@
             if (indiceAtual < jogosBasicos.length - 1) {
                 window.location.href = jogosBasicos[indiceAtual + 1];
             } else {
-                window.location.href = 'index.html#basico';
+                window.location.href = 'index.html?nivel=basico';
             }
         }
 
