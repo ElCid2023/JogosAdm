@@ -186,10 +186,8 @@
         </div>
     </div>
 
+    <script src="sistema-pontuacao.js"></script>
     <script>
-        const questions = [
-            {
-                question: "Quais são as 5 Forças de Porter?",
                 options: [
                     "Rivalidade, Substitutos, Fornecedores, Novos Entrantes, Compradores",
                     "Vendas, Marketing, Produção, Finanças, RH",
@@ -357,7 +355,7 @@
             document.getElementById('final-screen').style.display = 'block';
             const percentage = (score / shuffledQuestions.length) * 100;
             document.getElementById('final-score').textContent = `${score}/${shuffledQuestions.length} (${percentage.toFixed(1)}%)`;
-            atualizarDesempenhoGoogleSheets();
+            sincronizarComServidor();
             let message = '';
             if (percentage >= 90) {
                 message = '🏆 Excelente! Você domina estratégia e inovação!';
@@ -397,35 +395,9 @@
         }
 
         function goHome() {
-            window.history.back();
+            window.location.href = 'index.html?nivel=avancado';
         }
         
-        function atualizarDesempenhoGoogleSheets() {
-            const dadosAluno = JSON.parse(localStorage.getItem('dados_aluno_atual') || '{}');
-            if (!dadosAluno.nome) return;
-            const stats = sistemaPontuacao.obterEstatisticas();
-            const agora = new Date();
-            const dados = {
-                nome: dadosAluno.nome,
-                semestre: dadosAluno.semestre,
-                turma: dadosAluno.turma,
-                periodo: dadosAluno.periodo,
-                email: dadosAluno.email,
-                data: agora.toLocaleDateString('pt-BR'),
-                hora: agora.toLocaleTimeString('pt-BR'),
-                pontuacao: stats.pontuacaoTotal,
-                progresso: stats.progresso + '%',
-                jogosCompletados: stats.jogosCompletados
-            };
-            const GOOGLE_SCRIPT_URL = localStorage.getItem('google_script_url');
-            if (!GOOGLE_SCRIPT_URL) return;
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dados)
-            }).catch(error => console.log('Erro'));
-        }
         
         function shuffleArray(array) {
             const shuffled = [...array];

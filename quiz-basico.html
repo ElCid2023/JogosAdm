@@ -395,8 +395,7 @@
             const pontos = Math.round((score / shuffledQuestions.length) * 100);
             const resultado = sistemaPontuacao.adicionarPontos('quiz-basico', pontos, 100);
             
-            // Atualizar Google Sheets com novo desempenho
-            atualizarDesempenhoGoogleSheets();
+            sincronizarComServidor();
             
             let message = '';
             if (percentage >= 90) {
@@ -430,38 +429,7 @@
             document.getElementById('final-message').textContent = message;
         }
         
-        function atualizarDesempenhoGoogleSheets() {
-            const dadosAluno = JSON.parse(localStorage.getItem('dados_aluno_atual') || '{}');
-            if (!dadosAluno.nome) return;
-            
-            const stats = sistemaPontuacao.obterEstatisticas();
-            const agora = new Date();
-            
-            const dados = {
-                nome: dadosAluno.nome,
-                semestre: dadosAluno.semestre,
-                turma: dadosAluno.turma,
-                periodo: dadosAluno.periodo,
-                email: dadosAluno.email,
-                data: agora.toLocaleDateString('pt-BR'),
-                hora: agora.toLocaleTimeString('pt-BR'),
-                pontuacao: stats.pontuacaoTotal,
-                progresso: stats.progresso + '%',
-                jogosCompletados: stats.jogosCompletados
-            };
-            
-            const GOOGLE_SCRIPT_URL = localStorage.getItem('google_script_url');
-            if (!GOOGLE_SCRIPT_URL) return;
-            
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dados)
-            }).catch(error => {
-                console.log('Erro ao atualizar Google Sheets');
-            });
-        }
+
 
         function shuffleArray(array) {
             const shuffled = [...array];
@@ -490,7 +458,7 @@
         }
 
         function goHome() {
-            window.history.back();
+            window.location.href = 'index.html?nivel=basico';
         }
         
         function proximoJogo() {
@@ -514,7 +482,7 @@
                 window.location.href = jogosBasicos[indiceAtual + 1];
             } else {
                 // Último jogo, volta para o menu do básico
-                window.location.href = 'index.html#basico';
+                window.location.href = 'index.html?nivel=basico';
             }
         }
         

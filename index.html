@@ -398,13 +398,31 @@
             }
             
             playerName = name;
-            
+
             // Registrar acesso no Google Sheets e LocalStorage
             registrarAcesso(name, semestre, turma, periodo, email);
-            
+
+            // Recarregar sistema de pontuação com os dados do aluno recém logado
+            sistemaPontuacao.recarregarAluno();
+
             document.getElementById('name-input').classList.add('hidden');
             document.getElementById('level-selection').classList.remove('hidden');
             document.getElementById('player-name').textContent = playerName;
+
+            // Carregar pontuação do servidor em segundo plano
+            const loadingMsg = document.createElement('div');
+            loadingMsg.id = 'loading-server';
+            loadingMsg.style.cssText = 'text-align:center;color:#667eea;font-size:0.95em;margin-top:10px;';
+            loadingMsg.textContent = '⏳ Sincronizando seu progresso...';
+            document.getElementById('level-selection').appendChild(loadingMsg);
+
+            sistemaPontuacao.carregarDoServidor(GOOGLE_SCRIPT_URL).then(() => {
+                const msg = document.getElementById('loading-server');
+                if (msg) {
+                    msg.textContent = '✅ Progresso sincronizado!';
+                    setTimeout(() => msg.remove(), 2000);
+                }
+            });
         }
         
         function registrarAcesso(nome, semestre, turma, periodo, email) {
@@ -556,6 +574,14 @@
             
             if (nivel && dadosAluno.nome) {
                 playerName = dadosAluno.nome;
+                // Garantir que o sistema carrega os dados do aluno correto
+                sistemaPontuacao.recarregarAluno();
+
+                // Sincronizar com servidor ao voltar de um jogo
+                sistemaPontuacao.carregarDoServidor(GOOGLE_SCRIPT_URL).then(() => {
+                    atualizarEstatisticas();
+                });
+
                 document.getElementById('name-input').classList.add('hidden');
                 document.getElementById('level-selection').classList.add('hidden');
                 document.getElementById('player-name').textContent = playerName;
