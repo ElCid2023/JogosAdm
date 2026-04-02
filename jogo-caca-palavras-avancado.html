@@ -172,24 +172,6 @@
 
     <script src="sistema-pontuacao.js"></script>
     <script>
-        function criarBarraProgresso(elementId, progresso, titulo) {
-            const elemento = document.getElementById(elementId);
-            if (!elemento) return;
-            
-            elemento.innerHTML = `
-                <div style="margin: 10px 0;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <span style="font-weight: bold;">${titulo}</span>
-                        <span style="font-weight: bold;">${progresso}%</span>
-                    </div>
-                    <div style="background: #e0e0e0; height: 20px; border-radius: 10px; overflow: hidden;">
-                        <div style="background: linear-gradient(90deg, #4CAF50, #45a049); height: 100%; width: ${progresso}%; transition: width 0.5s ease;"></div>
-                    </div>
-                </div>
-            `;
-        }
-    </script>
-    <script>
         const words = [
             { word: 'PORTER', hint: '5 Forças de...' },
             { word: 'SWOT', hint: 'Análise estratégica' },
@@ -349,6 +331,7 @@
                             const tempo = document.getElementById('timer').textContent;
                             const pontos = Math.max(50, 100 - foundWords.length * 2);
                             const resultado = sistemaPontuacao.adicionarPontos('caca-palavras-avancado', pontos, 100);
+                            sincronizarComServidor();
                             
                             const progresso = JSON.parse(localStorage.getItem('progresso_niveis') || '{}');
                             const percentual = (pontos / 100) * 100;
@@ -389,7 +372,7 @@
         }
 
         function goHome() {
-            window.location.href = 'index.html?nivel=avancado';
+            window.history.back();
         }
 
         document.addEventListener('DOMContentLoaded', () => {

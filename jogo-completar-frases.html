@@ -335,6 +335,7 @@
             
             const pontos = Math.round((score / sentences.length) * 100);
             const resultado = sistemaPontuacao.adicionarPontos('completar-frases', pontos, 100);
+            sincronizarComServidor();
             
             document.getElementById('next-btn').disabled = false;
             
@@ -396,7 +397,7 @@
         }
 
         function goHome() {
-            window.location.href = 'index.html?nivel=basico';
+            window.history.back();
         }
 
         document.addEventListener('DOMContentLoaded', () => {

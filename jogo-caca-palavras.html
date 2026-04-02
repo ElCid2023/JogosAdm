@@ -320,6 +320,7 @@
 
         function completeGame() {
             const resultado = sistemaPontuacao.adicionarPontos('caca-palavras', points, 300);
+            sincronizarComServidor();
             
             // Habilitar próximo jogo
             document.getElementById('next-btn').disabled = false;
@@ -401,7 +402,7 @@
         }
 
         function goHome() {
-            window.location.href = 'index.html?nivel=basico';
+            window.history.back();
         }
 
         document.addEventListener('DOMContentLoaded', () => {

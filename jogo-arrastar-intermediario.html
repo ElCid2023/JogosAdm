@@ -228,24 +228,6 @@
 
     <script src="sistema-pontuacao.js"></script>
     <script>
-        function criarBarraProgresso(elementId, progresso, titulo) {
-            const elemento = document.getElementById(elementId);
-            if (!elemento) return;
-            
-            elemento.innerHTML = `
-                <div style="margin: 10px 0;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <span style="font-weight: bold;">${titulo}</span>
-                        <span style="font-weight: bold;">${progresso}%</span>
-                    </div>
-                    <div style="background: #e0e0e0; height: 20px; border-radius: 10px; overflow: hidden;">
-                        <div style="background: linear-gradient(90deg, #4CAF50, #45a049); height: 100%; width: ${progresso}%; transition: width 0.5s ease;"></div>
-                    </div>
-                </div>
-            `;
-        }
-    </script>
-    <script>
         let score = 0;
         let totalItems = 12;
         let gameCompleted = false;
@@ -406,6 +388,7 @@
                 const percentage = (score / totalItems) * 100;
                 const pontos = Math.round(percentage);
                 const resultado = sistemaPontuacao.adicionarPontos('arrastar-intermediario', pontos, 100);
+                sincronizarComServidor();
                 
                 // Atualizar progresso do nível
                 const progresso = JSON.parse(localStorage.getItem('progresso_niveis') || '{}');
@@ -462,7 +445,7 @@
         }
 
         function goHome() {
-            window.location.href = 'index.html?nivel=intermediario';
+            window.history.back();
         }
         
         function proximoJogo() {

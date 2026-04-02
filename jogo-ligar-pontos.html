@@ -231,6 +231,7 @@
         function completeGame() {
             const pontos = score * 20;
             const resultado = sistemaPontuacao.adicionarPontos('ligar-pontos', pontos, 120);
+            sincronizarComServidor();
             
             document.getElementById('next-btn').disabled = false;
             
@@ -293,7 +294,7 @@
         }
 
         function goHome() {
-            window.location.href = 'index.html?nivel=basico';
+            window.history.back();
         }
 
         document.addEventListener('DOMContentLoaded', () => {

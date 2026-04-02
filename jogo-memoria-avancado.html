@@ -117,24 +117,6 @@
 
     <script src="sistema-pontuacao.js"></script>
     <script>
-        function criarBarraProgresso(elementId, progresso, titulo) {
-            const elemento = document.getElementById(elementId);
-            if (!elemento) return;
-            
-            elemento.innerHTML = `
-                <div style="margin: 10px 0;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <span style="font-weight: bold;">${titulo}</span>
-                        <span style="font-weight: bold;">${progresso}%</span>
-                    </div>
-                    <div style="background: #e0e0e0; height: 20px; border-radius: 10px; overflow: hidden;">
-                        <div style="background: linear-gradient(90deg, #4CAF50, #45a049); height: 100%; width: ${progresso}%; transition: width 0.5s ease;"></div>
-                    </div>
-                </div>
-            `;
-        }
-    </script>
-    <script>
         const cards = [
             { id: 1, text: 'SWOT' },
             { id: 1, text: 'Forças, Fraquezas, Oportunidades, Ameaças' },
@@ -251,6 +233,7 @@
                     
                     const pontos = Math.max(40, 100 - (attempts * 2));
                     const resultado = sistemaPontuacao.adicionarPontos('memoria-avancado', pontos, 100);
+                    sincronizarComServidor();
                     
                     document.getElementById('next-btn').disabled = false;
                     
@@ -296,7 +279,7 @@
         }
 
         function goHome() {
-            window.location.href = 'index.html?nivel=avancado';
+            window.history.back();
         }
         
         function proximoJogo() {
