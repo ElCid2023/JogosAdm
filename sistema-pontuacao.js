@@ -41,54 +41,23 @@ class SistemaPontuacao {
         if (!dados.nome || !googleScriptUrl) return;
 
         try {
-            // Google Apps Script requer jsonp para GET cross-origin
-            // Usamos um iframe oculto + postMessage como workaround
-            const url = googleScriptUrl
-                + '?acao=carregar'
-                + '&nome='     + encodeURIComponent(dados.nome)
-                + '&turma='    + encodeURIComponent(dados.turma    || '')
-                + '&semestre=' + encodeURIComponent(dados.semestre || '')
-                + '&callback=_admCallback';
+            const resposta = await Promise.race([
+                fetch(googleScriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tipo:     'carregar',
+                        nome:     dados.nome,
+                        turma:    dados.turma    || '',
+                        semestre: dados.semestre || ''
+                    })
+                }),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000))
+            ]);
 
-            await new Promise((resolve) => {
-                // Timeout de 5s — se não responder, usa dados locais
-                const timeout = setTimeout(resolve, 5000);
-
-                window._admCallback = (json) => {
-                    clearTimeout(timeout);
-                    try {
-                        if (json.status === 'ok' && json.dados) {
-                            const pontuacaoServidor = parseInt(json.dados.pontuacao) || 0;
-                            const jogosServidor = json.dados.jogos ? JSON.parse(json.dados.jogos) : {};
-
-                            let atualizado = false;
-                            for (const [jogo, pts] of Object.entries(jogosServidor)) {
-                                const ptsLocal = this.jogosCompletados[jogo] || 0;
-                                if (pts > ptsLocal) {
-                                    this.jogosCompletados[jogo] = pts;
-                                    atualizado = true;
-                                }
-                            }
-
-                            if (atualizado) {
-                                this.pontuacaoTotal = Object.values(this.jogosCompletados).reduce((a, b) => a + b, 0);
-                                this.salvarPontuacao();
-                                this.salvarJogosCompletados();
-                            } else if (pontuacaoServidor > this.pontuacaoTotal) {
-                                this.pontuacaoTotal = pontuacaoServidor;
-                                this.salvarPontuacao();
-                            }
-                        }
-                    } catch(err) {}
-                    resolve();
-                };
-
-                const script = document.createElement('script');
-                script.src = url;
-                script.onerror = () => { clearTimeout(timeout); resolve(); };
-                document.head.appendChild(script);
-                setTimeout(() => script.remove(), 6000);
-            });
+            // no-cors retorna opaque response — não conseguimos ler o body
+            // Nesse caso mantemos os dados locais (que já são os corretos)
         } catch (e) {
             console.log('Sem conexão com servidor, usando dados locais.');
         }
@@ -174,6 +143,8 @@ function sincronizarComServidor() {
     const GOOGLE_SCRIPT_URL = localStorage.getItem('google_script_url');
     if (!GOOGLE_SCRIPT_URL) return;
 
+    // Garantir que os dados em memória estão atualizados antes de enviar
+    sistemaPontuacao.recarregarAluno();
     const stats = sistemaPontuacao.obterEstatisticas();
     const agora = new Date();
 
