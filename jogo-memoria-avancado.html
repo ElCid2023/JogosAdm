@@ -296,7 +296,7 @@
         }
 
         function goHome() {
-            window.history.back();
+            window.location.href = 'index.html?nivel=avancado';
         }
         
         function proximoJogo() {
@@ -313,7 +313,7 @@
             if (indiceAtual < jogosAvancados.length - 1) {
                 window.location.href = jogosAvancados[indiceAtual + 1];
             } else {
-                window.location.href = 'index.html#avancado';
+                window.location.href = 'index.html?nivel=avancado';
             }
         }
 

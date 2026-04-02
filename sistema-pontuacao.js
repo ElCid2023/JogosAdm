@@ -95,6 +95,8 @@ class SistemaPontuacao {
     }
 
     adicionarPontos(jogo, pontos, maxPontos) {
+        // Garantir que estamos usando a chave do aluno logado
+        this.recarregarAluno();
         const pontuacaoAnterior = this.jogosCompletados[jogo] || 0;
         if (pontos > pontuacaoAnterior) {
             this.pontuacaoTotal += (pontos - pontuacaoAnterior);

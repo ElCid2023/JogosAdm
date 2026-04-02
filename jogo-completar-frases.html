@@ -382,7 +382,7 @@
             if (indiceAtual < jogosBasicos.length - 1) {
                 window.location.href = jogosBasicos[indiceAtual + 1];
             } else {
-                window.location.href = 'index.html#basico';
+                window.location.href = 'index.html?nivel=basico';
             }
         }
 
@@ -396,7 +396,7 @@
         }
 
         function goHome() {
-            window.location.href = 'index.html#basico';
+            window.location.href = 'index.html?nivel=basico';
         }
 
         document.addEventListener('DOMContentLoaded', () => {

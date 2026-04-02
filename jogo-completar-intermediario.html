@@ -392,6 +392,7 @@
                 const percentage = (score / totalBlanks) * 100;
                 const pontos = Math.round(percentage);
                 const resultado = sistemaPontuacao.adicionarPontos('completar-intermediario', pontos, 100);
+                sincronizarComServidor();
                 
                 // Atualizar progresso do nível
                 const progresso = JSON.parse(localStorage.getItem('progresso_niveis') || '{}');
@@ -450,7 +451,7 @@
             if (indiceAtual < jogosIntermediarios.length - 1) {
                 window.location.href = jogosIntermediarios[indiceAtual + 1];
             } else {
-                window.location.href = 'index.html#intermediario';
+                window.history.back();
             }
         }
 
